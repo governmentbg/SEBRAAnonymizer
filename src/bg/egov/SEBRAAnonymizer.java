@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -31,15 +32,22 @@ import com.ibm.icu.text.Transliterator;
 public class SEBRAAnonymizer {
 
     private static final List<String> NAME_SUFFIXES = Arrays.asList("ова", "ева", "ска", "ов", "ев", "ски", "ин", 
-            "ина", "ич", "ян", "ан", "чки", "чка", "цки", "цка", "шки", "шка", "зки", "зка");
+            "ина", "ич", "ян", "ан", "чки", "чка", "цки", "цка", "шки", "шка", "зки", "зка", "ян", "иан");
 
+    private static final List<String> OTHER_PERSONAL_NAMES = Arrays.asList("ахмед", "ахмет", "мехмед", "сезгин", "мюмюн", "мустафа", "халил", "гюнер", "гюнай", 
+            "сунай", "байрам", "ибрям", "хасан", "джейхан", "ерджан", "рамадан", "фатме", "редже", "хамид", "хамди", "юсеин", "хусейн", "сабри", " али", 
+            "адам", "анави", "аврам", "арон", "финци", "шварц", " леви", "ицхак", "исак", "коен", "соломон", "яков", "щайн", "берг", 
+            "джераси", "езра", "фридман", "йосиф", "барух", "давид", "бехар");
+    
     private static final Transliterator TRANSLITERATOR = Transliterator.getInstance("Latin-Cyrillic");
     
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("d/M/yyyy");
     
     private static final List<String> NON_PERSONAL_INDICATORS = Arrays.asList("мбал", "община", "ет ", "медицински", 
             "оод", "сд ", "камара", "аптека", "агенция", " ад", "еад", "еод", "банка", "зк ", " съд", "университет", 
-            "асоциация", "зпк", " сие"); 
+            "асоциация", "зпк", " сие", "холдинг", "българск", "студентск"); 
+    
+    private static final Pattern WHITESPACE = Pattern.compile("\\s+");
     
     public static void main(String[] args) throws Exception {
         if (args.length != 3) {
@@ -59,7 +67,7 @@ public class SEBRAAnonymizer {
                 } else {
                     org.setName(name);
                 }
-                org.setFrom(LocalDate.parse(record.get(3).trim().split(" ")[0], DATE_FORMAT).atStartOfDay());
+                org.setFrom(LocalDate.parse(record.get(3).trim().split("\\s+")[0], DATE_FORMAT).atStartOfDay());
                 if (record.get(4).endsWith("3333")) {
                     org.setTo(LocalDateTime.now().plusWeeks(1));
                 } else {
@@ -97,17 +105,24 @@ public class SEBRAAnonymizer {
                         }
                         
                         String untranslitaratedBeneficiary = untransliterate(record.get(1));
+                        
+                        if (untranslitaratedBeneficiary.matches(".+\\b\\d{10}\\b") || untranslitaratedBeneficiary.toLowerCase().contains("ЕГН")) {
+                            // edge case where the EGN is part of the beneficiary field
+                            untranslitaratedBeneficiary = untranslitaratedBeneficiary.replaceAll("\\d+", "").replace("ЕГН", "");
+                            row.set(1, untranslitaratedBeneficiary);
+                        }
+                        
+                        String beneficiary = untranslitaratedBeneficiary.toLowerCase();
                         if (isPersonalName(untranslitaratedBeneficiary) 
                                 && !untranslitaratedBeneficiary.contains("\"") 
                                 && !untranslitaratedBeneficiary.contains(".")
                                 && !untranslitaratedBeneficiary.contains("'")
                                 && !untranslitaratedBeneficiary.trim().startsWith("ЕТ")
-                                && NON_PERSONAL_INDICATORS.stream().noneMatch(s -> untranslitaratedBeneficiary.toLowerCase().contains(s))) {
-                            String anonymizedName = untranslitaratedBeneficiary.substring(0, untranslitaratedBeneficiary.indexOf(' '));
-                            row.set(1, anonymizedName + " ***");
-                        } else if (untranslitaratedBeneficiary.matches(".+\\b\\d{10}\\b") || untranslitaratedBeneficiary.contains("ЕГН")) {
-                            // edge case where the EGN is part of the beneficiary field
-                            row.set(1, untranslitaratedBeneficiary.replaceAll("\\d+", ""));
+                                && NON_PERSONAL_INDICATORS.stream().noneMatch(s -> beneficiary.contains(s))) {
+                            // In order to include parts of the person's name, there's a need to amend the decision of the council of ministers
+                            //String anonymizedName = untranslitaratedBeneficiary.substring(0, untranslitaratedBeneficiary.indexOf(' '));
+                            //row.set(1, anonymizedName + " ***");
+                            row.set(1, "Физическо лице");
                         }
                         row.set(7, reason1.trim());
                         row.set(8, reason2.trim());
@@ -188,8 +203,10 @@ public class SEBRAAnonymizer {
     }
     
     private static boolean isPersonalName(String str) {
-        return StringUtils.countMatches(str, ' ') == 2 && 
-                NAME_SUFFIXES.stream().anyMatch(s -> str.toLowerCase().matches(".+\\p{L}{2,}" + s + "\\b.+"));
+        String lowerCaseString = str.toLowerCase().trim();
+        return WHITESPACE.matcher(lowerCaseString).results().count() == 2 && 
+                (NAME_SUFFIXES.stream().anyMatch(s -> lowerCaseString.matches(".+\\p{L}{2,}" + s + "\\b.+") || 
+                        OTHER_PERSONAL_NAMES.stream().anyMatch(name -> lowerCaseString.contains(name))));
     }
 
     private static String untransliterate(String reason) {
