@@ -97,7 +97,8 @@ public class Sebra extends javax.swing.JFrame {
     public String taText = "";      // TextArea
     public String slText = "";      // StatusLabel
     public static Transliterator TRANSLITERATOR = Transliterator.getInstance("Latin-Cyrillic");
-    public static DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("d/M/yyyy");
+    //public static DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("d/M/yyyy");
+    public static DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     public static MessageDigest DIGEST;
     public static Pattern WHITESPACE = Pattern.compile("\\s+");
 
@@ -598,7 +599,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMousePressed
 
     private void menuAboutMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMousePressed
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.0</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.01</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMousePressed
 
@@ -608,7 +609,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMouseEntered
 
     private void menuAboutMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMouseEntered
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.0</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.01</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMouseEntered
 
@@ -660,7 +661,7 @@ public class Sebra extends javax.swing.JFrame {
         String reason2 = "";
 
         Map<String, List<Organization>> organizations = new HashMap<>();  // CODE,NAME,DESCR,DATE_FROM,DATE_TO
-        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(orgCsv)), "cp1251")) {  // org.csv
+        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(orgCsv)), "utf-8")) {  // org.csv | (new FileInputStream(orgCsv)), "cp1251")
             CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader());
             for (CSVRecord record : parser) {
                 List<Organization> list = organizations.computeIfAbsent(record.get(0), (k) -> new ArrayList<>());  // // Add a new key-value pair only if the key does not exist in the HashMap, or is mapped to `null`.
@@ -689,7 +690,7 @@ public class Sebra extends javax.swing.JFrame {
             Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(inCsv)), "cp1251"); OutputStreamWriter writer = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outCsv)), StandardCharsets.UTF_8)) {  // (new BufferedOutputStream(new FileOutputStream(outCsv)), StandardCharsets.UTF_8)  // (new BufferedOutputStream(new FileOutputStream(outCsv)), "UTF-8")
+        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(inCsv)), "utf-8"); OutputStreamWriter writer = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outCsv)), StandardCharsets.UTF_8)) {  // (new BufferedOutputStream(new FileOutputStream(outCsv)), StandardCharsets.UTF_8)  // (new BufferedOutputStream(new FileOutputStream(outCsv)), "UTF-8") // (new FileInputStream(inCsv)), "cp1251")
             CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT);
             try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
                 int anonymizedReasons = 0;
@@ -721,8 +722,8 @@ public class Sebra extends javax.swing.JFrame {
 
                         row.set(1, beneficiary);
                         row.set(2, iban);
-                        row.set(7, reason1);
-                        row.set(8, reason2);
+                        row.set(8, reason1);
+                        row.set(9, reason2);
 
                         if (!beneficiary.equalsIgnoreCase(record.get(1))) {
                             anonymizedReceivers++;
