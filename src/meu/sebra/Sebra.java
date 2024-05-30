@@ -92,13 +92,28 @@ public class Sebra extends javax.swing.JFrame {
     public Path pathSaltTxt;
     public Path pathOutCsv;
     public Path pathFolder;
+    public String inDelRegNumCsv;  // Файл за изтриване по номер на регистрация! | File to delete by registration number!
+    public String outDelRegNumCsv;  // Файл с резултатни данни от изтриването по номер на регистрация! | Delete result data file by registration number!
+    public String rejectedDelRegNumCsv;  // Файл с изтрити/отхвърлени записи при  изтриването по номер на регистрация! | Deleted/rejected records file when deleting by registration number!
+    public String regNumCsv;  // Файл-масив с номера на регистрация и себра кодове! | File-array with registration numbers and sebra codes!
+    public String inDelSebraCodesCsv;  // Файл за изтриване по себра код! | File to delete by sebra code!
+    public String outDelSebraCodesCsv;  // Файл с резултатни данни от изтриването по себра код! | A file with the result data of the deletion by sebra code!
+    public String sebraCodesCsv;  // Файл-масив със себра кодове! | File-array with sebra codes!
+    public String rejectedDelSebraCodesCsv;  // Файл с изтрити/отхвърлени записи при изтриване по себра код! | Deleted/rejected records file when deleting by sebra code!
+    public Path pathInDelRegNumCsv;
+    public Path pathOutDelRegNumCsv;
+    public Path pathRegNumCsv;
+    public Path pathRejectedDelRegNumCsv;
+    public Path pathInDelSebraCodesCsv;
+    public Path pathOutDelSebraCodesCsv;
+    public Path pathSebraCodesCsv;
+    public Path pathRejectedDelSebraCodesCsv;
     public String salt;
     public Config config;
     public String taText = "";      // TextArea
     public String slText = "";      // StatusLabel
     public static Transliterator TRANSLITERATOR = Transliterator.getInstance("Latin-Cyrillic");
-    //public static DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("d/M/yyyy");
-    public static DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    public static DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");  // ("d/M/yyyy")
     public static MessageDigest DIGEST;
     public static Pattern WHITESPACE = Pattern.compile("\\s+");
 
@@ -122,6 +137,12 @@ public class Sebra extends javax.swing.JFrame {
         saltTxt = "";
         outCsv = "";
         folder = "";
+        inDelRegNumCsv = "";
+        outDelRegNumCsv = "";
+        regNumCsv = "";
+        inDelSebraCodesCsv = "";
+        outDelSebraCodesCsv = "";
+        sebraCodesCsv = "";
 
         // KeyPairGenerator generator = null;
         // KeyPair pair;
@@ -151,7 +172,6 @@ public class Sebra extends javax.swing.JFrame {
         // } catch (NoSuchAlgorithmException ex) {
         //     Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
         // }
-
         removeDataGeneralStatisticsTextArea();
         taText = " 1. Изберете: Входящ файл!";
         setDataGeneralStatisticsTextArea(taText);
@@ -248,6 +268,12 @@ public class Sebra extends javax.swing.JFrame {
         statusLabel = new javax.swing.JLabel();
         sebraMenuBar = new javax.swing.JMenuBar();
         menuChoiceFile = new javax.swing.JMenu();
+        menuDeleteRegNum = new javax.swing.JMenu();
+        choiceInDelRegNumFile = new javax.swing.JMenuItem();
+        choiceRegNumFile = new javax.swing.JMenuItem();
+        menuDeleteSebraCode = new javax.swing.JMenu();
+        choiceInDelSebraCodesFile = new javax.swing.JMenuItem();
+        choiceSebraCodesFile = new javax.swing.JMenuItem();
         menuInCsv = new javax.swing.JMenuItem();
         menuOrgCsv = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
@@ -330,6 +356,56 @@ public class Sebra extends javax.swing.JFrame {
             }
         });
 
+        menuDeleteRegNum.setText("Изтриване по: Номер на регистрация");
+        menuDeleteRegNum.setToolTipText("");
+        menuDeleteRegNum.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+
+        choiceInDelRegNumFile.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        choiceInDelRegNumFile.setText("Избери: Файл за изтриване");
+        choiceInDelRegNumFile.setToolTipText("");
+        choiceInDelRegNumFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                choiceInDelRegNumFileActionPerformed(evt);
+            }
+        });
+        menuDeleteRegNum.add(choiceInDelRegNumFile);
+
+        choiceRegNumFile.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        choiceRegNumFile.setText("Избери: Файл с номера на регистрация");
+        choiceRegNumFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                choiceRegNumFileActionPerformed(evt);
+            }
+        });
+        menuDeleteRegNum.add(choiceRegNumFile);
+
+        menuChoiceFile.add(menuDeleteRegNum);
+
+        menuDeleteSebraCode.setText("Изтриване по: Sebra Code");
+        menuDeleteSebraCode.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+
+        choiceInDelSebraCodesFile.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        choiceInDelSebraCodesFile.setText("Избери: Файл за изтриване");
+        choiceInDelSebraCodesFile.setToolTipText("");
+        choiceInDelSebraCodesFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                choiceInDelSebraCodesFileActionPerformed(evt);
+            }
+        });
+        menuDeleteSebraCode.add(choiceInDelSebraCodesFile);
+
+        choiceSebraCodesFile.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        choiceSebraCodesFile.setText("Избери: Файл със Sebra Codes");
+        choiceSebraCodesFile.setToolTipText("");
+        choiceSebraCodesFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                choiceSebraCodesFileActionPerformed(evt);
+            }
+        });
+        menuDeleteSebraCode.add(choiceSebraCodesFile);
+
+        menuChoiceFile.add(menuDeleteSebraCode);
+
         menuInCsv.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         menuInCsv.setText("Входящ файл");
         menuInCsv.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -381,6 +457,7 @@ public class Sebra extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void menuInCsvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuInCsvActionPerformed
+        // Selecting an incoming file to anonymize!
         File selectedFile = null;
         String nameFile = null;
         String onlyNameFile = null;
@@ -509,6 +586,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuInCsvActionPerformed
 
     private void menuOrgCsvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuOrgCsvActionPerformed
+        // Select administrations file!
         File selectedFile = null;
         String nameFile = null;
         String onlyNameFile = null;
@@ -599,7 +677,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMousePressed
 
     private void menuAboutMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMousePressed
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.01</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.03</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMousePressed
 
@@ -609,9 +687,333 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMouseEntered
 
     private void menuAboutMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMouseEntered
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.01</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.03</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMouseEntered
+
+    private void choiceInDelRegNumFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_choiceInDelRegNumFileActionPerformed
+        // Изтриване по: Номер на регистрация -> Избери: Файл за изтриване
+        // Delete by: Registration number -> Select: File to delete
+        File selectedFile = null;
+        String nameFile = null;
+        String onlyNameFile = null;
+        String msg = null;
+        String error_text = null;
+        JFileChooser fileChooser = null;
+        folder = this.getPathFolder();
+        if (folder.equals(null) || folder.equals("")) {
+            folder = System.getProperty("user.home").toString();
+        }
+        fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(folder));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("csv", "CSV"));
+        int result = fileChooser.showOpenDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            try {
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+                selectedFile = fileChooser.getSelectedFile();
+                inDelRegNumCsv = selectedFile.getAbsolutePath();
+                nameFile = selectedFile.getName();
+                folder = selectedFile.getParent();
+                String[] res = nameFile.split("[.]", 0);
+                onlyNameFile = res[0];
+                outDelRegNumCsv = folder + "\\" + "deleted_" + onlyNameFile + ".csv";
+                pathOutDelRegNumCsv = Paths.get(outDelRegNumCsv);
+                rejectedDelRegNumCsv = folder + "\\" + "rejected_" + onlyNameFile + ".csv";
+                pathRejectedDelRegNumCsv = Paths.get(rejectedDelRegNumCsv);
+                this.setPathFolder(folder);
+                this.setPathInDelRegNumCsv(inDelRegNumCsv);
+                this.setPathOutDelRegNumCsv(outDelRegNumCsv);
+                this.setPathRejectedDelSebraCodesCsv(rejectedDelRegNumCsv);
+
+                taText = " • Избран файл: " + inDelRegNumCsv + "!";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelRegNumCsv + "</FONT></html>";
+                setStatusLabel(slText);
+                pathInCsv = Paths.get(inDelRegNumCsv);
+                msg = "<html>&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelRegNumCsv + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+
+                if (!Files.exists(pathOutDelRegNumCsv)) {
+                    Files.createFile(pathOutDelRegNumCsv);
+                }
+                if (!Files.exists(pathRejectedDelRegNumCsv)) {
+                    Files.createFile(pathRejectedDelRegNumCsv);
+                }
+
+                this.setCursor(Cursor.getDefaultCursor());
+            } catch (Exception ex) {
+                Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+                error_text = ex.getMessage().toString();
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+                clearStatusLabel();
+            } finally {
+                try {
+                    this.setCursor(Cursor.getDefaultCursor());
+                } catch (Exception ex) {
+                    Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+                    error_text = ex.getMessage().toString();
+                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                    clearStatusLabel();
+                }
+            }
+        }
+    }//GEN-LAST:event_choiceInDelRegNumFileActionPerformed
+
+    private void choiceRegNumFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_choiceRegNumFileActionPerformed
+        // Изтриване по: Номер на регистрация -> Избери: Файл с номера на регистрация
+        // Delete by: Registration Number -> Select: File with Registration Number
+        File selectedFile = null;
+        String nameFile = null;
+        String onlyNameFile = null;
+        String msg = null;
+        String error_text = null;
+        JFileChooser fileChooser = null;
+        folder = this.getPathFolder();
+        if (folder.equals(null) || folder.equals("")) {
+            folder = System.getProperty("user.home").toString();
+        }
+        fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(folder));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("csv", "CSV"));
+        int result = fileChooser.showOpenDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            try {
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+                selectedFile = fileChooser.getSelectedFile();
+                regNumCsv = selectedFile.getAbsolutePath();
+                nameFile = selectedFile.getName();
+                folder = selectedFile.getParent();
+                String[] res = nameFile.split("[.]", 0);
+                onlyNameFile = res[0];
+                this.setPathFolder(folder);
+                this.setPathRegNumCsv(regNumCsv);
+                inDelRegNumCsv = this.getPathInDelRegNumCsv();
+                outDelRegNumCsv = this.getPathOutDelRegNumCsv();
+                rejectedDelRegNumCsv = this.getPathRejectedDelRegNumCsv();
+
+                if (inDelRegNumCsv.equals(null) || inDelRegNumCsv.equals("") || outDelRegNumCsv.equals("") || outDelRegNumCsv.equals("")) {  // No Incoming File or Outgoing File selected!  // Unable to start deletion!
+                    slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED></FONT><FONT COLOR=RED>Няма избран файл за изтриване по номер на регистрация!:&nbsp;</FONT></b><html>";
+                    setStatusLabel(slText);
+                    pathRegNumCsv = Paths.get(regNumCsv);
+                    msg = "<html>&nbsp;<b><FONT COLOR=RED></FONT><FONT COLOR=RED>Няма избран файл за изтриване по номер на регистрация!&nbsp;</FONT></b><html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                } else {  // Selected Input and Output file!  // Anonymization can begin!
+                    taText = " • Избран файл: " + regNumCsv + "!";
+                    setDataGeneralStatisticsTextArea(taText);
+                    taText = "------------------------------------------------------------------------------------------------------------------";
+                    setDataGeneralStatisticsTextArea(taText);
+                    slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избрани файлове:&nbsp;&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelRegNumCsv + "&nbsp;&nbsp;•&nbsp;" + regNumCsv + "</FONT>";
+                    setStatusLabel(slText);
+                    pathInDelRegNumCsv = Paths.get(inDelRegNumCsv);
+                    pathRegNumCsv = Paths.get(regNumCsv);
+                    pathOutDelRegNumCsv = Paths.get(outDelRegNumCsv);
+                    pathRejectedDelRegNumCsv = Paths.get(rejectedDelRegNumCsv);
+
+                    Object[] options = {"Да, моля", "Няма начин!"};
+                    msg = "<html><i><b><FONT COLOR=BLUE>Да започне ли изтриването на избрания файл?</FONT></b></i></html>";
+                    int num_opt = JOptionPane.showOptionDialog(f, msg, "Уместен въпрос", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                    if (num_opt == JOptionPane.YES_OPTION) {
+                        makeDeletionByRegistrationNumber();
+                    } else if (num_opt == JOptionPane.NO_OPTION) {
+                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
+                        JOptionPane.showMessageDialog(f, msg);
+                        clearStatusLabel();
+                    } else {
+                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
+                        JOptionPane.showMessageDialog(f, msg);
+                        clearStatusLabel();
+                    }
+                }
+
+                this.setCursor(Cursor.getDefaultCursor());
+            } catch (Exception ex) {
+                Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+                error_text = ex.getMessage().toString();
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+                clearStatusLabel();
+            } finally {
+                try {
+                    this.setCursor(Cursor.getDefaultCursor());
+                } catch (Exception ex) {
+                    Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+                    error_text = ex.getMessage().toString();
+                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                    clearStatusLabel();
+                }
+            }
+        }
+    }//GEN-LAST:event_choiceRegNumFileActionPerformed
+
+    private void choiceInDelSebraCodesFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_choiceInDelSebraCodesFileActionPerformed
+        // Изтриване по: Sebra Code -> Избери: Файл за изтриване
+        // Delete by: Sebra Code -> Select: File to delete
+        File selectedFile = null;
+        String nameFile = null;
+        String onlyNameFile = null;
+        String msg = null;
+        String error_text = null;
+        JFileChooser fileChooser = null;
+        folder = this.getPathFolder();
+        if (folder.equals(null) || folder.equals("")) {
+            folder = System.getProperty("user.home").toString();
+        }
+        fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(folder));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("csv", "CSV"));
+        int result = fileChooser.showOpenDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            try {
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+                selectedFile = fileChooser.getSelectedFile();
+                inDelSebraCodesCsv = selectedFile.getAbsolutePath();
+                nameFile = selectedFile.getName();
+                folder = selectedFile.getParent();
+                String[] res = nameFile.split("[.]", 0);
+                onlyNameFile = res[0];
+                outDelSebraCodesCsv = folder + "\\" + "deleted_" + onlyNameFile + ".csv";
+                pathOutDelSebraCodesCsv = Paths.get(outDelSebraCodesCsv);
+                rejectedDelSebraCodesCsv = folder + "\\" + "rejected_" + onlyNameFile + ".csv";
+                pathRejectedDelSebraCodesCsv = Paths.get(rejectedDelSebraCodesCsv);
+                this.setPathFolder(folder);
+                this.setPathInDelSebraCodesCsv(inDelSebraCodesCsv);
+                this.setPathOutDelSebraCodesCsv(outDelSebraCodesCsv);
+                this.setPathRejectedDelSebraCodesCsv(rejectedDelSebraCodesCsv);
+
+                taText = " • Избран файл: " + inDelSebraCodesCsv + "!";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelSebraCodesCsv + "</FONT></html>";
+                setStatusLabel(slText);
+                pathInCsv = Paths.get(inDelSebraCodesCsv);
+                msg = "<html>&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelSebraCodesCsv + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+
+                if (!Files.exists(pathOutDelSebraCodesCsv)) {
+                    Files.createFile(pathOutDelSebraCodesCsv);
+                }
+                if (!Files.exists(pathRejectedDelSebraCodesCsv)) {
+                    Files.createFile(pathRejectedDelSebraCodesCsv);
+                }
+
+                this.setCursor(Cursor.getDefaultCursor());
+            } catch (Exception ex) {
+                Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+                error_text = ex.getMessage().toString();
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+                clearStatusLabel();
+            } finally {
+                try {
+                    this.setCursor(Cursor.getDefaultCursor());
+                } catch (Exception ex) {
+                    Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+                    error_text = ex.getMessage().toString();
+                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                    clearStatusLabel();
+                }
+            }
+        }
+    }//GEN-LAST:event_choiceInDelSebraCodesFileActionPerformed
+
+    private void choiceSebraCodesFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_choiceSebraCodesFileActionPerformed
+        // Изтриване по: Sebra Code -> Избери: Файл със Sebra Codes
+        // Delete by: Sebra Code -> Select: File with Sebra Codes
+        File selectedFile = null;
+        String nameFile = null;
+        String onlyNameFile = null;
+        String msg = null;
+        String error_text = null;
+        JFileChooser fileChooser = null;
+        folder = this.getPathFolder();
+        if (folder.equals(null) || folder.equals("")) {
+            folder = System.getProperty("user.home").toString();
+        }
+        fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(folder));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("csv", "CSV"));
+        int result = fileChooser.showOpenDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            try {
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+                selectedFile = fileChooser.getSelectedFile();
+                sebraCodesCsv = selectedFile.getAbsolutePath();
+                nameFile = selectedFile.getName();
+                folder = selectedFile.getParent();
+                String[] res = nameFile.split("[.]", 0);
+                onlyNameFile = res[0];
+                this.setPathFolder(folder);
+                this.setPathSebraCodesCsv(sebraCodesCsv);
+                inDelSebraCodesCsv = this.getPathInDelSebraCodesCsv();
+                outDelSebraCodesCsv = this.getPathOutDelSebraCodesCsv();
+                rejectedDelSebraCodesCsv = this.getPathRejectedDelSebraCodesCsv();
+
+                if (inDelSebraCodesCsv.equals(null) || inDelSebraCodesCsv.equals("") || outDelSebraCodesCsv.equals("") || outDelSebraCodesCsv.equals("")) {  // No Incoming File or Outgoing File selected!  // Unable to start deletion!
+                    slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED></FONT><FONT COLOR=RED>Няма избран файл за изтриване по себра код!:&nbsp;</FONT></b><html>";
+                    setStatusLabel(slText);
+                    pathRegNumCsv = Paths.get(sebraCodesCsv);
+                    msg = "<html>&nbsp;<b><FONT COLOR=RED></FONT><FONT COLOR=RED>Няма избран файл за изтриване по себра код!&nbsp;</FONT></b><html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                } else {  // Selected Input and Output file!  // Anonymization can begin!
+                    taText = " • Избран файл: " + sebraCodesCsv + "!";
+                    setDataGeneralStatisticsTextArea(taText);
+                    taText = "------------------------------------------------------------------------------------------------------------------";
+                    setDataGeneralStatisticsTextArea(taText);
+                    slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избрани файлове:&nbsp;&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelSebraCodesCsv + "&nbsp;&nbsp;•&nbsp;" + sebraCodesCsv + "</FONT>";
+                    setStatusLabel(slText);
+                    pathInDelSebraCodesCsv = Paths.get(inDelSebraCodesCsv);
+                    pathSebraCodesCsv = Paths.get(sebraCodesCsv);
+                    pathOutDelSebraCodesCsv = Paths.get(outDelSebraCodesCsv);
+                    pathRejectedDelSebraCodesCsv = Paths.get(rejectedDelSebraCodesCsv);
+
+                    Object[] options = {"Да, моля", "Няма начин!"};
+                    msg = "<html><i><b><FONT COLOR=BLUE>Да започне ли изтриването на избрания файл?</FONT></b></i></html>";
+                    int num_opt = JOptionPane.showOptionDialog(f, msg, "Уместен въпрос", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                    if (num_opt == JOptionPane.YES_OPTION) {
+                        makeDeletionBySebraCode();
+                    } else if (num_opt == JOptionPane.NO_OPTION) {
+                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
+                        JOptionPane.showMessageDialog(f, msg);
+                        clearStatusLabel();
+                    } else {
+                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
+                        JOptionPane.showMessageDialog(f, msg);
+                        clearStatusLabel();
+                    }
+                }
+
+                this.setCursor(Cursor.getDefaultCursor());
+            } catch (Exception ex) {
+                Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+                error_text = ex.getMessage().toString();
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+                clearStatusLabel();
+            } finally {
+                try {
+                    this.setCursor(Cursor.getDefaultCursor());
+                } catch (Exception ex) {
+                    Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+                    error_text = ex.getMessage().toString();
+                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                    clearStatusLabel();
+                }
+            }
+        }
+    }//GEN-LAST:event_choiceSebraCodesFileActionPerformed
 
     /**
      * @param args the command line arguments
@@ -797,7 +1199,7 @@ public class Sebra extends javax.swing.JFrame {
                 setDataGeneralStatisticsTextArea(taText);
                 taText = "------------------------------------------------------------------------------------------------------------------";
                 setDataGeneralStatisticsTextArea(taText);
-               taText = " • Проверка за коректна анонимизация.";
+                taText = " • Проверка за коректна анонимизация.";
                 setDataGeneralStatisticsTextArea(taText);
                 taText = "   В анинимизирания файл не трябва да има:";
                 setDataGeneralStatisticsTextArea(taText);
@@ -905,7 +1307,7 @@ public class Sebra extends javax.swing.JFrame {
                                 if (part.length() == 10) {
                                     encryptEgn = encryptionEgn(part);
                                     hashEncryptEgn = hashEncryptionEgn(encryptEgn);
-                                    result += "ЕГН " + hashEncryptEgn + " ";
+                                    result += " " + hashEncryptEgn + " ";
                                     System.out.println("3.2. isPartOnlyDigits: " + isPartOnlyDigits + " | IF (part.length() == 10) " + " | part: " + part + " | result: " + result + "");
                                 } else {
                                     result += part + " ";
@@ -995,7 +1397,7 @@ public class Sebra extends javax.swing.JFrame {
                                         if (part.length() == 10) {
                                             encryptEgn = encryptionEgn(part);
                                             hashEncryptEgn = hashEncryptionEgn(encryptEgn);
-                                            result += "ЕГН " + hashEncryptEgn + " ";
+                                            result += " " + hashEncryptEgn + " ";
                                             System.out.println("6.3. isPartOnlyDigits: " + isPartOnlyDigits + " | IF (part.length() == 10) " + " | part: " + part + " | result: " + result + "");
                                         } else {
                                             result += part + " ";
@@ -1156,7 +1558,7 @@ public class Sebra extends javax.swing.JFrame {
                             if (part.length() == 10) {
                                 encryptEgn = encryptionEgn(part);
                                 hashEncryptEgn = hashEncryptionEgn(encryptEgn);
-                                result += "ЕГН " + hashEncryptEgn + " ";
+                                result += " " + hashEncryptEgn + " ";
                                 System.out.println("3.2. isPartOnlyDigits: " + isPartOnlyDigits + " | IF (part.length() == 10) " + " | part: " + part + " | result: " + result + "");
                             } else {
                                 result += part + " ";
@@ -1256,7 +1658,7 @@ public class Sebra extends javax.swing.JFrame {
                                             if (part.length() == 10) {
                                                 encryptEgn = encryptionEgn(part);
                                                 hashEncryptEgn = hashEncryptionEgn(encryptEgn);
-                                                result += "ЕГН " + hashEncryptEgn + " ";
+                                                result += " " + hashEncryptEgn + " ";
                                                 System.out.println("7.3. isPartOnlyDigits: " + isPartOnlyDigits + " | IF (part.length() == 10) " + " | part: " + part + " | result: " + result + "");
                                             } else {
                                                 result += part + " ";
@@ -1344,7 +1746,7 @@ public class Sebra extends javax.swing.JFrame {
                                         if (part.length() == 10) {
                                             encryptEgn = encryptionEgn(part);
                                             hashEncryptEgn = hashEncryptionEgn(encryptEgn);
-                                            result += "ЕГН " + hashEncryptEgn + " ";
+                                            result += " " + hashEncryptEgn + " ";
                                             System.out.println("9.3. isPartOnlyDigits: " + isPartOnlyDigits + " | IF (part.length() == 10) " + " | part: " + part + " | result: " + result + "");
                                         } else {
                                             result += part + " ";
@@ -1445,6 +1847,8 @@ public class Sebra extends javax.swing.JFrame {
     }
 
     private String anonymizeReceiversIban(String iban, String beneficiary) {
+        String encryptIban = "";
+        String hashEncryptIban = "";
         String result = "";
         Boolean isHasPerson = false;
 
@@ -1460,7 +1864,9 @@ public class Sebra extends javax.swing.JFrame {
                 || (beneficiary.matches("ФИЗИЧЕСКО ЛИЦЕ\\s"))
                 || (beneficiary.matches("ФИЗИЧЕСКО ЛИЦЕ"))) {  // With/Without a word Before/After the isHasPerson, With/Without a point, With/Without a space after the word isHasPerson!
             isHasPerson = true;
-            iban = "IBAN";
+            encryptIban = encryptionIban(iban);
+            hashEncryptIban = hashEncryptionIban(encryptIban);
+            iban = hashEncryptIban;
         } else {  // The expression does NOT contain an isHasPerson!
             isHasPerson = false;
         }
@@ -1535,8 +1941,255 @@ public class Sebra extends javax.swing.JFrame {
         this.salt = salt;
     }
 
-    public static class Organization {
+    // ////////////////////////////////////////
+    public String getPathInDelRegNumCsv() {
+        return inDelRegNumCsv;
+    }
 
+    public void setPathInDelRegNumCsv(String inDelRegNumCsv) {
+        this.inDelRegNumCsv = inDelRegNumCsv;
+    }
+
+    public String getPathOutDelRegNumCsv() {
+        return outDelRegNumCsv;
+    }
+
+    public void setPathOutDelRegNumCsv(String outDelRegNumCsv) {
+        this.outDelRegNumCsv = outDelRegNumCsv;
+    }
+
+    public String getPathRegNumCsv() {
+        return regNumCsv;
+    }
+
+    public void setPathRegNumCsv(String regNumCsv) {
+        this.regNumCsv = regNumCsv;
+    }
+
+    public String getPathRejectedDelRegNumCsv() {
+        return rejectedDelRegNumCsv;
+    }
+
+    public void setPathRejectedDelRegNumCsv(String rejectedDelRegNumCsv) {
+        this.rejectedDelRegNumCsv = rejectedDelRegNumCsv;
+    }
+
+    public String getPathInDelSebraCodesCsv() {
+        return inDelSebraCodesCsv;
+    }
+
+    public void setPathInDelSebraCodesCsv(String inDelSebraCodesCsv) {
+        this.inDelSebraCodesCsv = inDelSebraCodesCsv;
+    }
+
+    public String getPathOutDelSebraCodesCsv() {
+        return outDelSebraCodesCsv;
+    }
+
+    public void setPathOutDelSebraCodesCsv(String outDelSebraCodesCsv) {
+        this.outDelSebraCodesCsv = outDelSebraCodesCsv;
+    }
+
+    public String getPathSebraCodesCsv() {
+        return sebraCodesCsv;
+    }
+
+    public void setPathSebraCodesCsv(String sebraCodesCsv) {
+        this.sebraCodesCsv = sebraCodesCsv;
+    }
+
+    public String getPathRejectedDelSebraCodesCsv() {
+        return rejectedDelSebraCodesCsv;
+    }
+
+    public void setPathRejectedDelSebraCodesCsv(String rejectedDelSebraCodesCsv) {
+        this.rejectedDelSebraCodesCsv = rejectedDelSebraCodesCsv;
+    }
+
+    public void makeDeletionByRegistrationNumber() {
+        inDelRegNumCsv = getPathInDelRegNumCsv();  // Файл за изтриване по номер на регистрация! | File to delete by registration number!
+        regNumCsv = getPathRegNumCsv();  // Файл-масив с номера на регистрация и себра кодове! | File-array with registration numbers and sebra codes!
+        outDelRegNumCsv = getPathOutDelRegNumCsv();  // Файл с резултатни данни от изтриването по номер на регистрация! | Delete result data file by registration number!
+        rejectedDelRegNumCsv = getPathRejectedDelRegNumCsv();  // Файл с изтрити/отхвърлени записи при  изтриването по номер на регистрация! | Deleted/rejected records file when deleting by registration number!
+        String msg = null;
+        String sebra_code = "";  // RegistrationNumbers.sebraCode
+        String reg_number = "";  // RegistrationNumbers.regNumber
+        String fin_code = "";  // inDelRegNumCsv.FIN_CODE
+        String reg_no = "";  // inDelRegNumCsv.REG_NO
+        Boolean isExistRegNum = false;
+        int rejectedRecords = 0;
+        String rejectedResult = "";
+        ArrayList<RegistrationNumbers> listRegNum = new ArrayList<RegistrationNumbers>();
+
+        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(regNumCsv)), "utf-8")) {
+            CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader());
+            for (CSVRecord record : parser) {
+                RegistrationNumbers registrationNumbers = new RegistrationNumbers();
+                sebra_code = record.get(0);
+                reg_number = record.get(1);
+                registrationNumbers.sebraCode = sebra_code.toLowerCase().trim();  // sebra_code.trim().toUpperCase();
+                registrationNumbers.regNumber = reg_number.toLowerCase().trim();  // reg_number.trim().toUpperCase();
+                listRegNum.add(registrationNumbers);
+            }
+            reader.close();
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(inDelRegNumCsv)), "utf-8"); OutputStreamWriter writer = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outDelRegNumCsv)), StandardCharsets.UTF_8)) {
+            OutputStreamWriter writerRejected = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(rejectedDelRegNumCsv)), StandardCharsets.UTF_8);
+            CSVPrinter printerRejected = new CSVPrinter(writerRejected, CSVFormat.DEFAULT);
+            CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT);
+            try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+                rejectedRecords = 0;
+                for (CSVRecord record : parser) {
+                    try {
+                        rejectedResult = "";
+                        List<String> row = new ArrayList<>();
+                        for (int i = 0; i < record.size(); i++) {
+                            row.add(record.get(i).trim());
+                        }
+                        fin_code = record.get(4).toLowerCase().trim();  // FIN_CODE // fin_code.trim().toUpperCase();
+                        reg_no = record.get(11).toLowerCase().trim();  // REG_NO // reg_no.trim().toUpperCase();
+                        isExistRegNum = false;
+                        for (RegistrationNumbers listRN : listRegNum) {
+                            sebra_code = listRN.sebraCode;
+                            reg_number = listRN.regNumber;
+                            if (fin_code.equalsIgnoreCase(sebra_code) && reg_number.equalsIgnoreCase(reg_no)) {
+                                isExistRegNum = true;
+                                rejectedRecords++;
+                                rejectedResult = sebra_code.toUpperCase() + " | " + reg_number.toUpperCase();
+                                break;
+                            }
+                        }
+                        if (isExistRegNum == false) {
+                            printer.printRecord(row);
+                        } else {
+                            printerRejected.printRecord(rejectedResult);
+                        }
+                        printer.flush();
+                        printerRejected.flush();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+            reader.close();
+            writer.close();
+            writerRejected.close();
+
+            taText = " Изтриването завърши успешно!";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = " • Изтрити редове: " + String.valueOf(rejectedRecords);
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void makeDeletionBySebraCode() {
+        inDelSebraCodesCsv = getPathInDelSebraCodesCsv();  // Файл за изтриване по себра код! | File to delete by sebra code!
+        sebraCodesCsv = getPathSebraCodesCsv();  // Файл-масив със себра кодове! | File-array with sebra codes!
+        outDelSebraCodesCsv = getPathOutDelSebraCodesCsv();  // Файл с резултатни данни от изтриването по себра код! | A file with the result data of the deletion by sebra code!
+        rejectedDelSebraCodesCsv = getPathRejectedDelSebraCodesCsv();  // Файл с изтрити/отхвърлени записи при изтриване по себра код! | Deleted/rejected records file when deleting by sebra code!
+        String msg = null;
+        String sebra_code = "";  // SebraCodes.sebraCode
+        String fin_code = "";  // inDelSebraCodesCsv.FIN_CODE
+        Boolean isExistSebraCode = false;
+        int rejectedRecords = 0;
+        ArrayList<SebraCodes> listSebraCodes = new ArrayList<SebraCodes>();
+
+        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(sebraCodesCsv)), "utf-8")) {
+            CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader());
+            for (CSVRecord record : parser) {
+                SebraCodes sebraCodes = new SebraCodes();
+                sebra_code = record.get(0);
+                sebraCodes.sebraCode = sebra_code.toLowerCase().trim();  // sebra_code.trim().toUpperCase();
+                listSebraCodes.add(sebraCodes);
+            }
+            reader.close();
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(inDelSebraCodesCsv)), "utf-8"); OutputStreamWriter writer = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outDelSebraCodesCsv)), StandardCharsets.UTF_8)) {
+            OutputStreamWriter writerRejected = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(rejectedDelSebraCodesCsv)), StandardCharsets.UTF_8);
+            CSVPrinter printerRejected = new CSVPrinter(writerRejected, CSVFormat.DEFAULT);
+            CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT);
+            try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+                rejectedRecords = 0;
+                for (CSVRecord record : parser) {
+                    try {
+                        List<String> row = new ArrayList<>();
+                        for (int i = 0; i < record.size(); i++) {
+                            row.add(record.get(i).trim());
+                        }
+                        fin_code = record.get(4).toLowerCase().trim();  // FIN_CODE // fin_code.trim().toUpperCase();
+                        isExistSebraCode = false;
+                        for (SebraCodes listSC : listSebraCodes) {
+                            sebra_code = listSC.sebraCode;
+                            if (fin_code.equalsIgnoreCase(sebra_code)) {
+                                isExistSebraCode = true;
+                                rejectedRecords++;
+                                break;
+                            }
+                        }
+                        if (isExistSebraCode == false) {
+                            printer.printRecord(row);
+                        } else {
+                            printerRejected.printRecord(row);
+                        }
+                        printer.flush();
+                        printerRejected.flush();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+            reader.close();
+            writer.close();
+            writerRejected.close();
+
+            taText = " Изтриването завърши успешно!";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = " • Изтрити редове: " + String.valueOf(rejectedRecords);
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public class RegistrationNumbers {
+        public String sebraCode;
+        public String regNumber;
+    }
+
+    public class SebraCodes {
+        public String sebraCode;
+    }
+    // //////////////////////////
+
+    public static class Organization {
         private String code;
         private String name;
         private String description;
@@ -1810,7 +2463,11 @@ public class Sebra extends javax.swing.JFrame {
                         && (!part.contains("&"))
                         && (!part.contains("'")))) {
                     isExpressionPersonalName = true;
+                    break;
                 }
+            }
+            if (isExpressionPersonalName == true) {
+                break;
             }
         }
         if (isExpressionPersonalName == false) {
@@ -1830,9 +2487,14 @@ public class Sebra extends javax.swing.JFrame {
                             || part.matches(opn + "\\.\\b")
                             || part.matches(opn + "\\,\\b")
                             || part.matches(opn + "\\..+")
-                            || part.matches(opn + "\\,.+")) {
+                            || part.matches(opn + "\\,.+")
+                            || part.matches(opn)) {
                         isExpressionPersonalName = true;
+                        break;
                     }
+                }
+                if (isExpressionPersonalName == true) {
+                    break;
                 }
             }
         }
@@ -1863,9 +2525,14 @@ public class Sebra extends javax.swing.JFrame {
                         || part.matches(npi + "\\.\\d+")
                         || part.matches(npi + "\\,\\d+")
                         || part.matches(npi + "\\..+")
-                        || part.matches(npi + "\\,.+")) {
+                        || part.matches(npi + "\\,.+")
+                        || part.matches(npi)) {
                     isExpressionNonPersonalIndicators = true;
+                    break;
                 }
+            }
+            if (isExpressionNonPersonalIndicators == true) {
+                break;
             }
         }
 
@@ -2095,7 +2762,6 @@ public class Sebra extends javax.swing.JFrame {
             // decryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
             // byte[] decryptedMessageBytes = decryptCipher.doFinal(encryptedMessageBytes);
             // decryptedMessage = new String(decryptedMessageBytes, StandardCharsets.UTF_8);  // This is the decryption string
-            
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchPaddingException ex) {
@@ -2147,6 +2813,73 @@ public class Sebra extends javax.swing.JFrame {
         return resultPart;
     }
 
+    public String encryptionIban(String ibanPart) {
+        String encodedIban = "";
+        String decryptedIban = "";
+        PublicKey publicKey = null;
+        PrivateKey privateKey = null;
+        KeyFactory keyFactory = null;
+        Cipher encryptCipher = null;
+        Cipher decryptCipher = null;
+        X509EncodedKeySpec publicKeySpec = null;
+        PKCS8EncodedKeySpec privateKeySpec = null;
+
+        try {
+            keyFactory = KeyFactory.getInstance("RSA");
+            encryptCipher = Cipher.getInstance("RSA");
+            decryptCipher = Cipher.getInstance("RSA");
+
+            File publicKeyFile = new File("key/sebra_public.key");
+            byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+            publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+            publicKey = keyFactory.generatePublic(publicKeySpec);
+            encryptCipher.init(Cipher.ENCRYPT_MODE, (java.security.Key) publicKey);
+            byte[] ibanPartBytes = ibanPart.getBytes(StandardCharsets.UTF_8);
+            byte[] encryptIbanBytes = encryptCipher.doFinal(ibanPartBytes);
+            encodedIban = Base64.getEncoder().encodeToString(encryptIbanBytes);  // This is the encrypted string
+
+            // File privateKeyFile = new File("key/sebra_private.key");
+            // byte[] privateKeyBytes = Files.readAllBytes(privateKeyFile.toPath());
+            // privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+            // privateKey = keyFactory.generatePrivate(privateKeySpec);
+            // decryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
+            // byte[] decryptedIbanBytes = decryptCipher.doFinal(encryptedMessageBytes);
+            // decryptedIban = new String(decryptedIbanBytes, StandardCharsets.UTF_8);  // This is the decryption string
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchPaddingException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidKeyException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalBlockSizeException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (BadPaddingException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidKeySpecException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return encodedIban;
+    }
+
+    public String hashEncryptionIban(String encryptIban) {
+        int hashIntEncodedIban = 0;
+        String hashEncodedIban = "";
+
+        try {
+            hashIntEncodedIban = Math.abs(encryptIban.hashCode());
+            hashEncodedIban = Integer.toString(hashIntEncodedIban);
+        } catch (NumberFormatException nfe) {
+            System.out.println("NumberFormat Exception: invalid input string");
+        }
+
+        return hashEncodedIban;
+    }
+
     public void setDataGeneralStatisticsTextArea(String msg) {
         String newline = "\n";
         gsTextArea.append(msg + newline);
@@ -2166,12 +2899,18 @@ public class Sebra extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu About;
+    private javax.swing.JMenuItem choiceInDelRegNumFile;
+    private javax.swing.JMenuItem choiceInDelSebraCodesFile;
+    private javax.swing.JMenuItem choiceRegNumFile;
+    private javax.swing.JMenuItem choiceSebraCodesFile;
     private javax.swing.JScrollPane generalSebraScrollPane;
     private javax.swing.JTextArea gsTextArea;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenu menuAbout;
     private javax.swing.JMenu menuChoiceFile;
+    private javax.swing.JMenu menuDeleteRegNum;
+    private javax.swing.JMenu menuDeleteSebraCode;
     private javax.swing.JMenuItem menuInCsv;
     private javax.swing.JMenuItem menuOrgCsv;
     private javax.swing.JMenuBar sebraMenuBar;
