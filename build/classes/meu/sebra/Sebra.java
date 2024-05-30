@@ -48,6 +48,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.ibm.icu.text.Transliterator;
+import com.opencsv.CSVWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.UnsupportedEncodingException;
@@ -56,6 +57,7 @@ import static java.lang.Boolean.TRUE;
 import javax.swing.Box;
 import meu.config.Config;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -94,7 +96,8 @@ public class Sebra extends javax.swing.JFrame {
     public Path pathFolder;
     public String inDelRegNumCsv;  // Файл за изтриване по номер на регистрация! | File to delete by registration number!
     public String outDelRegNumCsv;  // Файл с резултатни данни от изтриването по номер на регистрация! | Delete result data file by registration number!
-    public String rejectedDelRegNumCsv;  // Файл с изтрити/отхвърлени записи при  изтриването по номер на регистрация! | Deleted/rejected records file when deleting by registration number!
+    public String rejectedDelRegNumCsv;  // Файл с отхвърлени (не изтрити автоматично) записи при изтриването по номер на регистрация! | File with rejected (not automatically deleted) records when deleting by registration number!
+    public String autodelRegNumCsv;  // Файл с автоматично изтрити записи при изтриването по номер на регистрация! | File with automatically deleted records when deleting by registration number!
     public String regNumCsv;  // Файл-масив с номера на регистрация и себра кодове! | File-array with registration numbers and sebra codes!
     public String inDelSebraCodesCsv;  // Файл за изтриване по себра код! | File to delete by sebra code!
     public String outDelSebraCodesCsv;  // Файл с резултатни данни от изтриването по себра код! | A file with the result data of the deletion by sebra code!
@@ -104,6 +107,7 @@ public class Sebra extends javax.swing.JFrame {
     public Path pathOutDelRegNumCsv;
     public Path pathRegNumCsv;
     public Path pathRejectedDelRegNumCsv;
+    public Path pathAutodelRegNumCsv;
     public Path pathInDelSebraCodesCsv;
     public Path pathOutDelSebraCodesCsv;
     public Path pathSebraCodesCsv;
@@ -139,10 +143,13 @@ public class Sebra extends javax.swing.JFrame {
         folder = "";
         inDelRegNumCsv = "";
         outDelRegNumCsv = "";
+        rejectedDelRegNumCsv = "";
+        autodelRegNumCsv = "";
         regNumCsv = "";
         inDelSebraCodesCsv = "";
         outDelSebraCodesCsv = "";
         sebraCodesCsv = "";
+        rejectedDelSebraCodesCsv = "";
 
         // KeyPairGenerator generator = null;
         // KeyPair pair;
@@ -217,7 +224,7 @@ public class Sebra extends javax.swing.JFrame {
         setDataGeneralStatisticsTextArea(taText);
         taText = " • CLIENT_RECEIVER_ACC:";
         setDataGeneralStatisticsTextArea(taText);
-        taText = "   - Ако CLIENT_RECEIVER_NAME = 'Физическо лице', то CLIENT_RECEIVER_ACC се заменят с: “IBAN”.";
+        taText = "   - Ако CLIENT_RECEIVER_NAME = 'Физическо лице', то CLIENT_RECEIVER_ACC се заменят с: абсолютната стойност на хеш кода на криптираната стойност (RSA public-key) на IBAN-a на Физическото лице.";
         setDataGeneralStatisticsTextArea(taText);
         taText = "   - Ако CLIENT_RECEIVER_NAME <> 'Физическо лице', то CLIENT_RECEIVER_ACC не се променя.";
         setDataGeneralStatisticsTextArea(taText);
@@ -677,7 +684,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMousePressed
 
     private void menuAboutMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMousePressed
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.03</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.04</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMousePressed
 
@@ -687,7 +694,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMouseEntered
 
     private void menuAboutMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMouseEntered
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.03</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.04</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMouseEntered
 
@@ -723,10 +730,14 @@ public class Sebra extends javax.swing.JFrame {
                 pathOutDelRegNumCsv = Paths.get(outDelRegNumCsv);
                 rejectedDelRegNumCsv = folder + "\\" + "rejected_" + onlyNameFile + ".csv";
                 pathRejectedDelRegNumCsv = Paths.get(rejectedDelRegNumCsv);
+                autodelRegNumCsv = folder + "\\" + "autodel_" + onlyNameFile + ".csv";
+                pathAutodelRegNumCsv = Paths.get(autodelRegNumCsv);
+
                 this.setPathFolder(folder);
                 this.setPathInDelRegNumCsv(inDelRegNumCsv);
                 this.setPathOutDelRegNumCsv(outDelRegNumCsv);
                 this.setPathRejectedDelSebraCodesCsv(rejectedDelRegNumCsv);
+                this.setPathAutodelRegNumCsv(autodelRegNumCsv);
 
                 taText = " • Избран файл: " + inDelRegNumCsv + "!";
                 setDataGeneralStatisticsTextArea(taText);
@@ -741,6 +752,9 @@ public class Sebra extends javax.swing.JFrame {
                 }
                 if (!Files.exists(pathRejectedDelRegNumCsv)) {
                     Files.createFile(pathRejectedDelRegNumCsv);
+                }
+                if (!Files.exists(pathAutodelRegNumCsv)) {
+                    Files.createFile(pathAutodelRegNumCsv);
                 }
 
                 this.setCursor(Cursor.getDefaultCursor());
@@ -797,6 +811,7 @@ public class Sebra extends javax.swing.JFrame {
                 inDelRegNumCsv = this.getPathInDelRegNumCsv();
                 outDelRegNumCsv = this.getPathOutDelRegNumCsv();
                 rejectedDelRegNumCsv = this.getPathRejectedDelRegNumCsv();
+                autodelRegNumCsv = this.getPathAutodelRegNumCsv();
 
                 if (inDelRegNumCsv.equals(null) || inDelRegNumCsv.equals("") || outDelRegNumCsv.equals("") || outDelRegNumCsv.equals("")) {  // No Incoming File or Outgoing File selected!  // Unable to start deletion!
                     slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED></FONT><FONT COLOR=RED>Няма избран файл за изтриване по номер на регистрация!:&nbsp;</FONT></b><html>";
@@ -815,6 +830,7 @@ public class Sebra extends javax.swing.JFrame {
                     pathRegNumCsv = Paths.get(regNumCsv);
                     pathOutDelRegNumCsv = Paths.get(outDelRegNumCsv);
                     pathRejectedDelRegNumCsv = Paths.get(rejectedDelRegNumCsv);
+                    pathAutodelRegNumCsv = Paths.get(autodelRegNumCsv);
 
                     Object[] options = {"Да, моля", "Няма начин!"};
                     msg = "<html><i><b><FONT COLOR=BLUE>Да започне ли изтриването на избрания файл?</FONT></b></i></html>";
@@ -1217,7 +1233,7 @@ public class Sebra extends javax.swing.JFrame {
                 setDataGeneralStatisticsTextArea(taText);
                 taText = "   - IBAN на бенефициент ФЛ:";
                 setDataGeneralStatisticsTextArea(taText);
-                taText = "       ⯈ Търсим в анонимизирания файл израза 'Физическо лице' за поле: 'CLIENT_RECEIVER_NAME' и проверяваме дали за тези записи поле: 'CLIENT_RECEIVER_ACC' = 'IBAN'.";
+                taText = "       ⯈ Търсим в анонимизирания файл израза 'Физическо лице' за поле: 'CLIENT_RECEIVER_NAME' и проверяваме дали за тези записи поле: 'CLIENT_RECEIVER_ACC' = 'абсолютната стойност на хеш кода на криптираната стойност (RSA public-key) на IBAN-a на Физическото лице'.";
                 setDataGeneralStatisticsTextArea(taText);
                 taText = "------------------------------------------------------------------------------------------------------------------";
                 setDataGeneralStatisticsTextArea(taText);
@@ -1974,6 +1990,14 @@ public class Sebra extends javax.swing.JFrame {
         this.rejectedDelRegNumCsv = rejectedDelRegNumCsv;
     }
 
+    public String getPathAutodelRegNumCsv() {
+        return autodelRegNumCsv;
+    }
+
+    public void setPathAutodelRegNumCsv(String autodelRegNumCsv) {
+        this.autodelRegNumCsv = autodelRegNumCsv;
+    }
+
     public String getPathInDelSebraCodesCsv() {
         return inDelSebraCodesCsv;
     }
@@ -2010,25 +2034,35 @@ public class Sebra extends javax.swing.JFrame {
         inDelRegNumCsv = getPathInDelRegNumCsv();  // Файл за изтриване по номер на регистрация! | File to delete by registration number!
         regNumCsv = getPathRegNumCsv();  // Файл-масив с номера на регистрация и себра кодове! | File-array with registration numbers and sebra codes!
         outDelRegNumCsv = getPathOutDelRegNumCsv();  // Файл с резултатни данни от изтриването по номер на регистрация! | Delete result data file by registration number!
-        rejectedDelRegNumCsv = getPathRejectedDelRegNumCsv();  // Файл с изтрити/отхвърлени записи при  изтриването по номер на регистрация! | Deleted/rejected records file when deleting by registration number!
+        rejectedDelRegNumCsv = getPathRejectedDelRegNumCsv();  // Файл с отхвърлени (не изтрити автоматично) записи при изтриването по номер на регистрация! | File with rejected (not automatically deleted) records when deleting by registration number!
+        autodelRegNumCsv = getPathAutodelRegNumCsv();  // Файл с автоматично изтрити записи при изтриването по номер на регистрация! | File with automatically deleted records when deleting by registration number!
         String msg = null;
+        String sebra_name = "";  // RegistrationNumbers.sebraName
         String sebra_code = "";  // RegistrationNumbers.sebraCode
         String reg_number = "";  // RegistrationNumbers.regNumber
+        String fin_name = "";  // inDelRegNumCsv.FIN_NAME
         String fin_code = "";  // inDelRegNumCsv.FIN_CODE
         String reg_no = "";  // inDelRegNumCsv.REG_NO
         Boolean isExistRegNum = false;
+        int autodelRecords = 0;
         int rejectedRecords = 0;
-        String rejectedResult = "";
         ArrayList<RegistrationNumbers> listRegNum = new ArrayList<RegistrationNumbers>();
+        ArrayList<RegistrationNumbers> listAutodel = new ArrayList<RegistrationNumbers>();
+        File fileAutodel = new File(autodelRegNumCsv);
+        File fileRejected = new File(rejectedDelRegNumCsv);
+        List<String[]> autodelResult = new ArrayList<String[]>();
+        List<String[]> rejectedResult = new ArrayList<String[]>();
 
         try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(regNumCsv)), "utf-8")) {
             CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader());
             for (CSVRecord record : parser) {
                 RegistrationNumbers registrationNumbers = new RegistrationNumbers();
-                sebra_code = record.get(0);
-                reg_number = record.get(1);
-                registrationNumbers.sebraCode = sebra_code.toLowerCase().trim();  // sebra_code.trim().toUpperCase();
-                registrationNumbers.regNumber = reg_number.toLowerCase().trim();  // reg_number.trim().toUpperCase();
+                sebra_name = record.get(0);
+                sebra_code = record.get(1);
+                reg_number = record.get(2);
+                registrationNumbers.sebraName = sebra_name.trim();  // sebra_name.trim().toUpperCase();  // sebra_name.toLowerCase().trim();
+                registrationNumbers.sebraCode = sebra_code.trim();  // sebra_code.trim().toUpperCase();  // sebra_code.toLowerCase().trim();
+                registrationNumbers.regNumber = reg_number.trim();  // reg_number.trim().toUpperCase();  // reg_number.toLowerCase().trim();
                 listRegNum.add(registrationNumbers);
             }
             reader.close();
@@ -2038,62 +2072,130 @@ public class Sebra extends javax.swing.JFrame {
             Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
         try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(inDelRegNumCsv)), "utf-8"); OutputStreamWriter writer = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outDelRegNumCsv)), StandardCharsets.UTF_8)) {
-            OutputStreamWriter writerRejected = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(rejectedDelRegNumCsv)), StandardCharsets.UTF_8);
-            CSVPrinter printerRejected = new CSVPrinter(writerRejected, CSVFormat.DEFAULT);
             CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT);
             try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
-                rejectedRecords = 0;
+                autodelRecords = 0;
+                FileWriter outputAutodel = new FileWriter(fileAutodel);
+                CSVWriter writerAutodel = new CSVWriter(outputAutodel, ',', CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+                autodelResult.add(new String[]{"FIN_NAME", "FIN_CODE", "REG_NO"});
+
                 for (CSVRecord record : parser) {
                     try {
-                        rejectedResult = "";
-                        List<String> row = new ArrayList<>();
+                        List<String> rowIn = new ArrayList<>();
                         for (int i = 0; i < record.size(); i++) {
-                            row.add(record.get(i).trim());
+                            rowIn.add(record.get(i).trim());
                         }
                         fin_code = record.get(4).toLowerCase().trim();  // FIN_CODE // fin_code.trim().toUpperCase();
+                        fin_name = record.get(5).toLowerCase().trim();  // FIN_NAME // fin_name.trim().toUpperCase();
                         reg_no = record.get(11).toLowerCase().trim();  // REG_NO // reg_no.trim().toUpperCase();
                         isExistRegNum = false;
                         for (RegistrationNumbers listRN : listRegNum) {
-                            sebra_code = listRN.sebraCode;
-                            reg_number = listRN.regNumber;
-                            if (fin_code.equalsIgnoreCase(sebra_code) && reg_number.equalsIgnoreCase(reg_no)) {
-                                isExistRegNum = true;
-                                rejectedRecords++;
-                                rejectedResult = sebra_code.toUpperCase() + " | " + reg_number.toUpperCase();
-                                break;
+                            try {
+                                sebra_name = listRN.sebraName.toLowerCase();
+                                sebra_code = listRN.sebraCode.toLowerCase();
+                                reg_number = listRN.regNumber.toLowerCase();
+                                if (fin_code.equalsIgnoreCase(sebra_code) && reg_no.equalsIgnoreCase(reg_number)) {
+                                    isExistRegNum = true;  // Записът е намерен и изтрит! | Record found and deleted!
+                                    autodelRecords++;
+                                    autodelResult.add(new String[]{sebra_name.toUpperCase(), sebra_code.toUpperCase(), reg_number.toUpperCase()});
+                                    break;
+                                }
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
                             }
                         }
                         if (isExistRegNum == false) {
-                            printer.printRecord(row);
-                        } else {
-                            printerRejected.printRecord(rejectedResult);
+                            printer.printRecord(rowIn);
                         }
-                        printer.flush();
-                        printerRejected.flush();
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }
+
+                writerAutodel.writeAll(autodelResult);
+                printer.flush();
+                writerAutodel.close();
+                writer.close();
             }
+
             reader.close();
             writer.close();
-            writerRejected.close();
-
-            taText = " Изтриването завърши успешно!";
-            setDataGeneralStatisticsTextArea(taText);
-            taText = " • Изтрити редове: " + String.valueOf(rejectedRecords);
-            setDataGeneralStatisticsTextArea(taText);
-            taText = "------------------------------------------------------------------------------------------------------------------";
-            setDataGeneralStatisticsTextArea(taText);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        try (Reader readerAutodel = new InputStreamReader(new BufferedInputStream(new FileInputStream(autodelRegNumCsv)), "utf-8")) {
+            CSVParser parserAutodel = CSVParser.parse(readerAutodel, CSVFormat.DEFAULT.withFirstRecordAsHeader());
+            for (CSVRecord record : parserAutodel) {
+                RegistrationNumbers registrationNumbers = new RegistrationNumbers();
+                sebra_name = record.get(0);
+                sebra_code = record.get(1);
+                reg_number = record.get(2);
+                registrationNumbers.sebraName = sebra_name.trim();  // sebra_name.trim().toUpperCase();  // sebra_name.toLowerCase().trim();
+                registrationNumbers.sebraCode = sebra_code.trim();  // sebra_code.trim().toUpperCase();  // sebra_code.toLowerCase().trim();
+                registrationNumbers.regNumber = reg_number.trim();  // reg_number.trim().toUpperCase();  // reg_number.toLowerCase().trim();
+                listAutodel.add(registrationNumbers);
+            }
+            readerAutodel.close();
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        try {
+            rejectedRecords = 0;
+            FileWriter outputRejected = new FileWriter(fileRejected);
+            CSVWriter writerRejected = new CSVWriter(outputRejected, ',', CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+            rejectedResult.add(new String[]{"FIN_NAME", "FIN_CODE", "REG_NO"});
+
+            for (RegistrationNumbers listRN : listRegNum) {
+                fin_name = listRN.sebraName.toLowerCase();
+                fin_code = listRN.sebraCode.toLowerCase();
+                reg_no = listRN.regNumber.toLowerCase();
+                isExistRegNum = false;
+                for (RegistrationNumbers listAD : listAutodel) {
+                    sebra_name = listAD.sebraName.toLowerCase();
+                    sebra_code = listAD.sebraCode.toLowerCase();
+                    reg_number = listAD.regNumber.toLowerCase();
+                    if (fin_code.equalsIgnoreCase(sebra_code) && reg_no.equalsIgnoreCase(reg_number)) {
+                        isExistRegNum = true;  // Записът е намерен в автоматично изтритите редове! | Record found in auto-deleted rows!
+                        break;
+                    }
+                }
+                if (isExistRegNum == false) {
+                    rejectedRecords++;
+                    rejectedResult.add(new String[]{fin_name.toUpperCase(), fin_code.toUpperCase(), reg_no.toUpperCase()});
+                }
+            }
+            writerRejected.writeAll(rejectedResult);
+            writerRejected.close();
+
+            taText = " Изтриването завърши успешно!";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = " • Изтрити редове: " + String.valueOf(autodelRecords);
+            setDataGeneralStatisticsTextArea(taText);
+            taText = " • Отхвърлени редове: " + String.valueOf(rejectedRecords);
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -2180,6 +2282,7 @@ public class Sebra extends javax.swing.JFrame {
     }
 
     public class RegistrationNumbers {
+        public String sebraName;
         public String sebraCode;
         public String regNumber;
     }
