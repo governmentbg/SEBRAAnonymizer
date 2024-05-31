@@ -102,7 +102,7 @@ public class Sebra extends javax.swing.JFrame {
     public String inDelSebraCodesCsv;  // Файл за изтриване по себра код! | File to delete by sebra code!
     public String outDelSebraCodesCsv;  // Файл с резултатни данни от изтриването по себра код! | A file with the result data of the deletion by sebra code!
     public String sebraCodesCsv;  // Файл-масив със себра кодове! | File-array with sebra codes!
-    public String rejectedDelSebraCodesCsv;  // Файл с изтрити/отхвърлени записи при изтриване по себра код! | Deleted/rejected records file when deleting by sebra code!
+    public String autodelDelSebraCodesCsv;  // Файл с изтрити записи при изтриване по себра код! | Deleted records file when deleting by sebra code!
     public Path pathInDelRegNumCsv;
     public Path pathOutDelRegNumCsv;
     public Path pathRegNumCsv;
@@ -111,7 +111,7 @@ public class Sebra extends javax.swing.JFrame {
     public Path pathInDelSebraCodesCsv;
     public Path pathOutDelSebraCodesCsv;
     public Path pathSebraCodesCsv;
-    public Path pathRejectedDelSebraCodesCsv;
+    public Path pathAutodelSebraCodesCsv;
     public String salt;
     public Config config;
     public String taText = "";      // TextArea
@@ -149,7 +149,7 @@ public class Sebra extends javax.swing.JFrame {
         inDelSebraCodesCsv = "";
         outDelSebraCodesCsv = "";
         sebraCodesCsv = "";
-        rejectedDelSebraCodesCsv = "";
+        autodelDelSebraCodesCsv = "";
 
         // KeyPairGenerator generator = null;
         // KeyPair pair;
@@ -684,7 +684,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMousePressed
 
     private void menuAboutMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMousePressed
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.04</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.05</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMousePressed
 
@@ -694,7 +694,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMouseEntered
 
     private void menuAboutMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMouseEntered
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.04</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.05</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMouseEntered
 
@@ -736,7 +736,7 @@ public class Sebra extends javax.swing.JFrame {
                 this.setPathFolder(folder);
                 this.setPathInDelRegNumCsv(inDelRegNumCsv);
                 this.setPathOutDelRegNumCsv(outDelRegNumCsv);
-                this.setPathRejectedDelSebraCodesCsv(rejectedDelRegNumCsv);
+                this.setPathRejectedDelRegNumCsv(rejectedDelRegNumCsv);
                 this.setPathAutodelRegNumCsv(autodelRegNumCsv);
 
                 taText = " • Избран файл: " + inDelRegNumCsv + "!";
@@ -899,12 +899,12 @@ public class Sebra extends javax.swing.JFrame {
                 onlyNameFile = res[0];
                 outDelSebraCodesCsv = folder + "\\" + "deleted_" + onlyNameFile + ".csv";
                 pathOutDelSebraCodesCsv = Paths.get(outDelSebraCodesCsv);
-                rejectedDelSebraCodesCsv = folder + "\\" + "rejected_" + onlyNameFile + ".csv";
-                pathRejectedDelSebraCodesCsv = Paths.get(rejectedDelSebraCodesCsv);
+                autodelDelSebraCodesCsv = folder + "\\" + "autodel_" + onlyNameFile + ".csv";
+                pathAutodelSebraCodesCsv = Paths.get(autodelDelSebraCodesCsv);
                 this.setPathFolder(folder);
                 this.setPathInDelSebraCodesCsv(inDelSebraCodesCsv);
                 this.setPathOutDelSebraCodesCsv(outDelSebraCodesCsv);
-                this.setPathRejectedDelSebraCodesCsv(rejectedDelSebraCodesCsv);
+                this.setPathAutodelSebraCodesCsv(autodelDelSebraCodesCsv);
 
                 taText = " • Избран файл: " + inDelSebraCodesCsv + "!";
                 setDataGeneralStatisticsTextArea(taText);
@@ -917,8 +917,8 @@ public class Sebra extends javax.swing.JFrame {
                 if (!Files.exists(pathOutDelSebraCodesCsv)) {
                     Files.createFile(pathOutDelSebraCodesCsv);
                 }
-                if (!Files.exists(pathRejectedDelSebraCodesCsv)) {
-                    Files.createFile(pathRejectedDelSebraCodesCsv);
+                if (!Files.exists(pathAutodelSebraCodesCsv)) {
+                    Files.createFile(pathAutodelSebraCodesCsv);
                 }
 
                 this.setCursor(Cursor.getDefaultCursor());
@@ -974,7 +974,7 @@ public class Sebra extends javax.swing.JFrame {
                 this.setPathSebraCodesCsv(sebraCodesCsv);
                 inDelSebraCodesCsv = this.getPathInDelSebraCodesCsv();
                 outDelSebraCodesCsv = this.getPathOutDelSebraCodesCsv();
-                rejectedDelSebraCodesCsv = this.getPathRejectedDelSebraCodesCsv();
+                autodelDelSebraCodesCsv = this.getPathAutodelSebraCodesCsv();
 
                 if (inDelSebraCodesCsv.equals(null) || inDelSebraCodesCsv.equals("") || outDelSebraCodesCsv.equals("") || outDelSebraCodesCsv.equals("")) {  // No Incoming File or Outgoing File selected!  // Unable to start deletion!
                     slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED></FONT><FONT COLOR=RED>Няма избран файл за изтриване по себра код!:&nbsp;</FONT></b><html>";
@@ -992,7 +992,7 @@ public class Sebra extends javax.swing.JFrame {
                     pathInDelSebraCodesCsv = Paths.get(inDelSebraCodesCsv);
                     pathSebraCodesCsv = Paths.get(sebraCodesCsv);
                     pathOutDelSebraCodesCsv = Paths.get(outDelSebraCodesCsv);
-                    pathRejectedDelSebraCodesCsv = Paths.get(rejectedDelSebraCodesCsv);
+                    pathAutodelSebraCodesCsv = Paths.get(autodelDelSebraCodesCsv);
 
                     Object[] options = {"Да, моля", "Няма начин!"};
                     msg = "<html><i><b><FONT COLOR=BLUE>Да започне ли изтриването на избрания файл?</FONT></b></i></html>";
@@ -2022,12 +2022,12 @@ public class Sebra extends javax.swing.JFrame {
         this.sebraCodesCsv = sebraCodesCsv;
     }
 
-    public String getPathRejectedDelSebraCodesCsv() {
-        return rejectedDelSebraCodesCsv;
+    public String getPathAutodelSebraCodesCsv() {
+        return autodelDelSebraCodesCsv;
     }
 
-    public void setPathRejectedDelSebraCodesCsv(String rejectedDelSebraCodesCsv) {
-        this.rejectedDelSebraCodesCsv = rejectedDelSebraCodesCsv;
+    public void setPathAutodelSebraCodesCsv(String autodelDelSebraCodesCsv) {
+        this.autodelDelSebraCodesCsv = autodelDelSebraCodesCsv;
     }
 
     public void makeDeletionByRegistrationNumber() {
@@ -2203,12 +2203,12 @@ public class Sebra extends javax.swing.JFrame {
         inDelSebraCodesCsv = getPathInDelSebraCodesCsv();  // Файл за изтриване по себра код! | File to delete by sebra code!
         sebraCodesCsv = getPathSebraCodesCsv();  // Файл-масив със себра кодове! | File-array with sebra codes!
         outDelSebraCodesCsv = getPathOutDelSebraCodesCsv();  // Файл с резултатни данни от изтриването по себра код! | A file with the result data of the deletion by sebra code!
-        rejectedDelSebraCodesCsv = getPathRejectedDelSebraCodesCsv();  // Файл с изтрити/отхвърлени записи при изтриване по себра код! | Deleted/rejected records file when deleting by sebra code!
+        autodelDelSebraCodesCsv = getPathAutodelSebraCodesCsv();  // Файл с изтрити записи при изтриване по себра код! | Deleted records file when deleting by sebra code!
         String msg = null;
         String sebra_code = "";  // SebraCodes.sebraCode
         String fin_code = "";  // inDelSebraCodesCsv.FIN_CODE
         Boolean isExistSebraCode = false;
-        int rejectedRecords = 0;
+        int autodelRecords = 0;
         ArrayList<SebraCodes> listSebraCodes = new ArrayList<SebraCodes>();
 
         try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(sebraCodesCsv)), "utf-8")) {
@@ -2229,11 +2229,11 @@ public class Sebra extends javax.swing.JFrame {
         }
 
         try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(inDelSebraCodesCsv)), "utf-8"); OutputStreamWriter writer = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outDelSebraCodesCsv)), StandardCharsets.UTF_8)) {
-            OutputStreamWriter writerRejected = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(rejectedDelSebraCodesCsv)), StandardCharsets.UTF_8);
-            CSVPrinter printerRejected = new CSVPrinter(writerRejected, CSVFormat.DEFAULT);
+            OutputStreamWriter writerAutodel = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(autodelDelSebraCodesCsv)), StandardCharsets.UTF_8);
+            CSVPrinter printerAutodel = new CSVPrinter(writerAutodel, CSVFormat.DEFAULT);
             CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT);
             try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
-                rejectedRecords = 0;
+                autodelRecords = 0;
                 for (CSVRecord record : parser) {
                     try {
                         List<String> row = new ArrayList<>();
@@ -2246,29 +2246,29 @@ public class Sebra extends javax.swing.JFrame {
                             sebra_code = listSC.sebraCode;
                             if (fin_code.equalsIgnoreCase(sebra_code)) {
                                 isExistSebraCode = true;
-                                rejectedRecords++;
+                                autodelRecords++;
                                 break;
                             }
                         }
                         if (isExistSebraCode == false) {
                             printer.printRecord(row);
                         } else {
-                            printerRejected.printRecord(row);
+                            printerAutodel.printRecord(row);
                         }
-                        printer.flush();
-                        printerRejected.flush();
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }
+                printer.flush();
+                printerAutodel.flush();
             }
             reader.close();
             writer.close();
-            writerRejected.close();
+            writerAutodel.close();
 
             taText = " Изтриването завърши успешно!";
             setDataGeneralStatisticsTextArea(taText);
-            taText = " • Изтрити редове: " + String.valueOf(rejectedRecords);
+            taText = " • Изтрити редове: " + String.valueOf(autodelRecords);
             setDataGeneralStatisticsTextArea(taText);
             taText = "------------------------------------------------------------------------------------------------------------------";
             setDataGeneralStatisticsTextArea(taText);
