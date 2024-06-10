@@ -684,7 +684,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMousePressed
 
     private void menuAboutMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMousePressed
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.05</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.06</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMousePressed
 
@@ -694,7 +694,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMouseEntered
 
     private void menuAboutMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMouseEntered
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.05</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.06</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMouseEntered
 
@@ -1625,6 +1625,9 @@ public class Sebra extends javax.swing.JFrame {
                             countPersonalName++;
                             partsPersonalName += part + " ";
                             System.out.println("5.1. isPartOnlyString: " + isPartOnlyString + " | isPartPersonalName: " + isPartPersonalName + " | partsPersonalName: " + partsPersonalName + " | part: " + part + " | result: " + result + "");
+                        } else {
+                            result += part + " ";
+                            System.out.println("5.1.1. isPartOnlyString: " + isPartOnlyString + " | isPartPersonalName: " + isPartPersonalName + " | partsPersonalName: " + partsPersonalName + " | part: " + part + " | result: " + result + "");
                         }
                     } else {  // Words isn't PersonalName
                         if (isPersonalName == true && (countPersonalName >= 2 && countPersonalName < 4)) {  // If the previous words are PersonalName
@@ -1812,6 +1815,9 @@ public class Sebra extends javax.swing.JFrame {
                                                     countPersonalName++;
                                                     partsPersonalName += part + " ";
                                                     System.out.println("10.5. isPartOnlyString: " + isPartOnlyString + " | isPartPersonalName: " + isPartPersonalName + " | partsPersonalName: " + partsPersonalName + " | part: " + part + " | result: " + result + "");
+                                                } else {
+                                                    result += part + " ";
+                                                    System.out.println("10.5.1. isPartOnlyString: " + isPartOnlyString + " | isPartPersonalName: " + isPartPersonalName + " | partsPersonalName: " + partsPersonalName + " | part: " + part + " | result: " + result + "");
                                                 }
                                             } else {  // Words isn't PersonalName
                                                 if (isPersonalName == true && (countPersonalName >= 2 && countPersonalName < 4)) {  // If the previous words are PersonalName
