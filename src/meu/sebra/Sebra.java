@@ -179,6 +179,7 @@ public class Sebra extends javax.swing.JFrame {
         // } catch (NoSuchAlgorithmException ex) {
         //     Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
         // }
+
         removeDataGeneralStatisticsTextArea();
         taText = " 1. Изберете: Входящ файл!";
         setDataGeneralStatisticsTextArea(taText);
@@ -684,7 +685,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMousePressed
 
     private void menuAboutMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMousePressed
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.06</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.07</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMousePressed
 
@@ -694,7 +695,7 @@ public class Sebra extends javax.swing.JFrame {
     }//GEN-LAST:event_menuChoiceFileMouseEntered
 
     private void menuAboutMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMouseEntered
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.06</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.07</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMouseEntered
 
@@ -2049,6 +2050,8 @@ public class Sebra extends javax.swing.JFrame {
         String fin_name = "";  // inDelRegNumCsv.FIN_NAME
         String fin_code = "";  // inDelRegNumCsv.FIN_CODE
         String reg_no = "";  // inDelRegNumCsv.REG_NO
+        String sebra_code_three = "";  // RegistrationNumbers.sebraCode - only first three symbols
+        String fin_code_three = "";  // inDelRegNumCsv.FIN_CODE - only first three symbols
         Boolean isExistRegNum = false;
         int autodelRecords = 0;
         int rejectedRecords = 0;
@@ -2087,48 +2090,74 @@ public class Sebra extends javax.swing.JFrame {
             try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
                 autodelRecords = 0;
                 FileWriter outputAutodel = new FileWriter(fileAutodel);
-                CSVWriter writerAutodel = new CSVWriter(outputAutodel, ',', CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
-                autodelResult.add(new String[]{"FIN_NAME", "FIN_CODE", "REG_NO"});
-
-                for (CSVRecord record : parser) {
-                    try {
-                        List<String> rowIn = new ArrayList<>();
-                        for (int i = 0; i < record.size(); i++) {
-                            rowIn.add(record.get(i).trim());
-                        }
-                        fin_code = record.get(4).toLowerCase().trim();  // FIN_CODE // fin_code.trim().toUpperCase();
-                        fin_name = record.get(5).toLowerCase().trim();  // FIN_NAME // fin_name.trim().toUpperCase();
-                        reg_no = record.get(11).toLowerCase().trim();  // REG_NO // reg_no.trim().toUpperCase();
-                        isExistRegNum = false;
-                        for (RegistrationNumbers listRN : listRegNum) {
-                            try {
-                                sebra_name = listRN.sebraName.toLowerCase();
-                                sebra_code = listRN.sebraCode.toLowerCase();
-                                reg_number = listRN.regNumber.toLowerCase();
-                                if (fin_code.equalsIgnoreCase(sebra_code) && reg_no.equalsIgnoreCase(reg_number)) {
-                                    isExistRegNum = true;  // Записът е намерен и изтрит! | Record found and deleted!
-                                    autodelRecords++;
-                                    autodelResult.add(new String[]{sebra_name.toUpperCase(), sebra_code.toUpperCase(), reg_number.toUpperCase()});
-                                    break;
-                                }
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
+                try (CSVWriter writerAutodel = new CSVWriter(outputAutodel, ',', CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+                    autodelResult.add(new String[]{"FIN_NAME", "FIN_CODE", "REG_NO"});
+                    for (CSVRecord record : parser) {
+                        try {
+                            List<String> rowIn = new ArrayList<>();
+                            for (int i = 0; i < record.size(); i++) {
+                                rowIn.add(record.get(i).trim());
                             }
+                            fin_code = record.get(4).toLowerCase().trim();  // FIN_CODE // fin_code.trim().toUpperCase();
+                            fin_name = record.get(5).toLowerCase().trim();  // FIN_NAME // fin_name.trim().toUpperCase();
+                            reg_no = record.get(11).toLowerCase().trim();  // REG_NO // reg_no.trim().toUpperCase();
+                            isExistRegNum = false;
+
+                            for (RegistrationNumbers listRN : listRegNum) {
+                                try {
+                                    sebra_name = listRN.sebraName.toLowerCase();
+                                    sebra_code = listRN.sebraCode.toLowerCase();
+                                    reg_number = listRN.regNumber.toLowerCase();
+                                    if (fin_code.equalsIgnoreCase(sebra_code) && reg_no.equalsIgnoreCase(reg_number)) {
+                                        isExistRegNum = true;  // Записът е намерен и изтрит! | Record found and deleted!
+                                        autodelRecords++;
+                                        autodelResult.add(new String[]{sebra_name.toUpperCase(), sebra_code.toUpperCase(), reg_number.toUpperCase()});
+                                        break;  // Излизаме от цикъла! | We're breaking out of the loop!
+                                    }
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+
+                            if (isExistRegNum == true) {
+                                continue;  // Взимаме следващия запис за сравнение! | We take the next entry for comparison!
+                            }
+
+                            // Ако записът не е намерен, да проверим за съвпадение само по първите три цифри от себра кода! | If the entry is not found, let's check for a match only on the first three digits of the zebra code!
+                            fin_code_three = fin_code.substring(0, 3);
+                            for (RegistrationNumbers listRN : listRegNum) {
+                                try {
+                                    sebra_name = listRN.sebraName.toLowerCase();
+                                    sebra_code = listRN.sebraCode.toLowerCase();
+                                    reg_number = listRN.regNumber.toLowerCase();
+                                    sebra_code_three = sebra_code.substring(0, 3);
+                                    if (fin_code_three.equalsIgnoreCase(sebra_code_three) && reg_no.equalsIgnoreCase(reg_number)) {
+                                        isExistRegNum = true;  // Записът е намерен и изтрит! | Record found and deleted!
+                                        autodelRecords++;
+                                        autodelResult.add(new String[]{sebra_name.toUpperCase(), sebra_code.toUpperCase(), reg_number.toUpperCase()});
+                                        break;  // Излизаме от цикъла! | We're breaking out of the loop!
+                                    }
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+
+                            if (isExistRegNum == true) {
+                                continue;  // Взимаме следващия запис за сравнение! | We take the next entry for comparison!
+                            }
+
+                            // Ако записът не е намерен за изтриване, да го добавим към файла за анонимизиране! | If the record is not found to delete, let's add it to the anonymization file!
+                            if (isExistRegNum == false) {
+                                printer.printRecord(rowIn);
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
-                        if (isExistRegNum == false) {
-                            printer.printRecord(rowIn);
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
                     }
+                    writerAutodel.writeAll(autodelResult);
+                    printer.flush();
                 }
-
-                writerAutodel.writeAll(autodelResult);
-                printer.flush();
-                writerAutodel.close();
-                writer.close();
             }
-
             reader.close();
             writer.close();
         } catch (FileNotFoundException ex) {
@@ -2167,31 +2196,29 @@ public class Sebra extends javax.swing.JFrame {
         try {
             rejectedRecords = 0;
             FileWriter outputRejected = new FileWriter(fileRejected);
-            CSVWriter writerRejected = new CSVWriter(outputRejected, ',', CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
-            rejectedResult.add(new String[]{"FIN_NAME", "FIN_CODE", "REG_NO"});
-
-            for (RegistrationNumbers listRN : listRegNum) {
-                fin_name = listRN.sebraName.toLowerCase();
-                fin_code = listRN.sebraCode.toLowerCase();
-                reg_no = listRN.regNumber.toLowerCase();
-                isExistRegNum = false;
-                for (RegistrationNumbers listAD : listAutodel) {
-                    sebra_name = listAD.sebraName.toLowerCase();
-                    sebra_code = listAD.sebraCode.toLowerCase();
-                    reg_number = listAD.regNumber.toLowerCase();
-                    if (fin_code.equalsIgnoreCase(sebra_code) && reg_no.equalsIgnoreCase(reg_number)) {
-                        isExistRegNum = true;  // Записът е намерен в автоматично изтритите редове! | Record found in auto-deleted rows!
-                        break;
+            try (CSVWriter writerRejected = new CSVWriter(outputRejected, ',', CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+                rejectedResult.add(new String[]{"FIN_NAME", "FIN_CODE", "REG_NO"});
+                for (RegistrationNumbers listRN : listRegNum) {
+                    fin_name = listRN.sebraName.toLowerCase();
+                    fin_code = listRN.sebraCode.toLowerCase();
+                    reg_no = listRN.regNumber.toLowerCase();
+                    isExistRegNum = false;
+                    for (RegistrationNumbers listAD : listAutodel) {
+                        sebra_name = listAD.sebraName.toLowerCase();
+                        sebra_code = listAD.sebraCode.toLowerCase();
+                        reg_number = listAD.regNumber.toLowerCase();
+                        if (fin_code.equalsIgnoreCase(sebra_code) && reg_no.equalsIgnoreCase(reg_number)) {
+                            isExistRegNum = true;  // Записът е намерен в автоматично изтритите редове! | Record found in auto-deleted rows!
+                            break;
+                        }
+                    }
+                    if (isExistRegNum == false) {
+                        rejectedRecords++;
+                        rejectedResult.add(new String[]{fin_name.toUpperCase(), fin_code.toUpperCase(), reg_no.toUpperCase()});
                     }
                 }
-                if (isExistRegNum == false) {
-                    rejectedRecords++;
-                    rejectedResult.add(new String[]{fin_name.toUpperCase(), fin_code.toUpperCase(), reg_no.toUpperCase()});
-                }
+                writerRejected.writeAll(rejectedResult);
             }
-            writerRejected.writeAll(rejectedResult);
-            writerRejected.close();
-
             taText = " Изтриването завърши успешно!";
             setDataGeneralStatisticsTextArea(taText);
             taText = " • Изтрити редове: " + String.valueOf(autodelRecords);
@@ -2871,6 +2898,7 @@ public class Sebra extends javax.swing.JFrame {
             // decryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
             // byte[] decryptedMessageBytes = decryptCipher.doFinal(encryptedMessageBytes);
             // decryptedMessage = new String(decryptedMessageBytes, StandardCharsets.UTF_8);  // This is the decryption string
+
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchPaddingException ex) {
