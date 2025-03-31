@@ -30,6 +30,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.Box;
+import javax.swing.JPasswordField;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,7 +58,6 @@ import java.io.FileReader;
 import java.io.UnsupportedEncodingException;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import javax.swing.Box;
 import meu.config.Config;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -76,6 +79,18 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.lang.Math;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.logging.FileHandler;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.Level;
+import java.util.concurrent.TimeUnit;
+
 
 /**
  *
@@ -84,42 +99,48 @@ import java.lang.Math;
 public class Sebra extends javax.swing.JFrame {
 
     JFrame f;
-    public String inCsv;
-    public String orgCsv;
-    public String saltTxt;
-    public String outCsv;
-    public String folder;
-    public Path pathInCsv;
-    public Path pathOrgCsv;
-    public Path pathSaltTxt;
-    public Path pathOutCsv;
-    public Path pathFolder;
-    public String inDelRegNumCsv;  // Файл за изтриване по номер на регистрация! | File to delete by registration number!
-    public String outDelRegNumCsv;  // Файл с резултатни данни от изтриването по номер на регистрация! | Delete result data file by registration number!
-    public String rejectedDelRegNumCsv;  // Файл с отхвърлени (не изтрити автоматично) записи при изтриването по номер на регистрация! | File with rejected (not automatically deleted) records when deleting by registration number!
-    public String autodelRegNumCsv;  // Файл с автоматично изтрити записи при изтриването по номер на регистрация! | File with automatically deleted records when deleting by registration number!
-    public String regNumCsv;  // Файл-масив с номера на регистрация и себра кодове! | File-array with registration numbers and sebra codes!
-    public String inDelSebraCodesCsv;  // Файл за изтриване по себра код! | File to delete by sebra code!
-    public String outDelSebraCodesCsv;  // Файл с резултатни данни от изтриването по себра код! | A file with the result data of the deletion by sebra code!
-    public String sebraCodesCsv;  // Файл-масив със себра кодове! | File-array with sebra codes!
-    public String autodelDelSebraCodesCsv;  // Файл с изтрити записи при изтриване по себра код! | Deleted records file when deleting by sebra code!
-    public Path pathInDelRegNumCsv;
-    public Path pathOutDelRegNumCsv;
-    public Path pathRegNumCsv;
-    public Path pathRejectedDelRegNumCsv;
-    public Path pathAutodelRegNumCsv;
-    public Path pathInDelSebraCodesCsv;
-    public Path pathOutDelSebraCodesCsv;
-    public Path pathSebraCodesCsv;
-    public Path pathAutodelSebraCodesCsv;
+    
+    public String inPreprocData;     // Предварителна обработка - Файл с Данни (Входящ csv файл - за обраборка)
+    public String outPreprocData;    // Предварителна обработка - Файл с Данни (Изходящ csv файл - обработен)
+    public Path pathInPreprocData;   // Предварителна обработка - Път до: Входящ csv файл с Данни - за обраборка
+    public Path pathOutPreprocData;  // Предварителна обработка - Път до: Изходящ csv файл с Данни - обработен
+    public String inPreprocAdm;      // Предварителна обработка - Файл с Администрации (Входящ csv файл - за обраборка)
+    public String outPreprocAdm;     // Предварителна обработка - Файл с Администрации (Изходящ csv файл - обработен)
+    public Path pathInPreprocAdm;    // Предварителна обработка - Път до: Входящ csv файл с Администрации - за обраборка
+    public Path pathOutPreprocAdm;   // Предварителна обработка - Път до: Изходящ csv файл с Администрации - обработен
+
+    public String inAnonymData;      // Анонимизация - Файл с Данни (Входящ csv файл - за обраборка)
+    public String outAnonymData;     // Анонимизация - Файл с Данни (Изходящ csv файл - обработен)
+    public Path pathInAnonymData;    // Анонимизация - Път до: Входящ csv файл с Данни - за обраборка
+    public Path pathOutAnonymData;   // Анонимизация - Път до: Изходящ csv файл с Данни - обработен
+    public String inAnonymAdm;       // Анонимизация - Файл с Администрации (Входящ csv файл - за обраборка)
+
+    public String inCheckData;       // Проверка в МЕУ - Файл с Данни (Входящ csv файл - за обраборка)
+    public String outCheckData;      // Проверка в МЕУ - Файл с Данни (Изходящ csv файл - обработен)
+    public Path pathInCheckData;     // Проверка в МЕУ - Път до: Входящ csv файл с Данни - за обраборка
+    public Path pathOutCheckData;    // Проверка в МЕУ - Път до: Изходящ csv файл с Данни - обработен
+
+    public String folder;            // Папка
+    public Path pathFolder;          // Път до: Папка
+    public String onlyNameFileData;  // Име на Файл с Данни
+    public String onlyNameFileAdm;   // Име на Файл с Администрации
+
+    public String taText = "";       // TextArea
+    public String slText = "";       // StatusLabel
     public String salt;
     public Config config;
-    public String taText = "";      // TextArea
-    public String slText = "";      // StatusLabel
+
     public static Transliterator TRANSLITERATOR = Transliterator.getInstance("Latin-Cyrillic");
     public static DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");  // ("d/M/yyyy")
     public static MessageDigest DIGEST;
     public static Pattern WHITESPACE = Pattern.compile("\\s+");
+    
+    public DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    public DateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    public Date currentDate = null;
+    private static final Logger log = Logger.getLogger(Sebra.class.getName());
+    private FileHandler fh = null;
+    private final String basePathLog = "./log/";
 
     static {
         try {
@@ -133,23 +154,34 @@ public class Sebra extends javax.swing.JFrame {
      * Creates new form Sebra
      */
     public Sebra() {
+
+        // +------------------------------------------------------------------------------------------------------------------------------------+
+        // | Избор на файл                              |                                                                               | About |
+        // | ================================================================================================================================== |
+        // | Анонимизация                             > | Избор: Файл с Данни           / Choice: Data File            (mAnonymData)            |
+        // | Anonymization (menuAnonymization)          | Избор: Файл с Администрации   / Choice: Administrations File (mAnonymAdministrations) |
+        // |............................................|.......................................................................................|
+        // | 1.Предварителна обработка (Pre-processing) |                                                                                       |
+        // | 2.Анонимизация (Anonymization)             |                                                                                       |
+        // | ---------------------------------------------------------------------------------------------------------------------------------- |
+        // | Проверка в МЕУ                           > | Избор: Файл с Данни           / Choice: Data File            (mCheckData)             |
+        // | Check at MEU (menuCheckMeu)                | Избор: Файл с Администрации   / Choice: Administrations File (mCheckAdministrations)  |
+        // +------------------------------------------------------------------------------------------------------------------------------------+
+
         initComponents();
         f = new JFrame();
         config = new Config();
-        inCsv = "";
-        orgCsv = "";
-        saltTxt = "";
-        outCsv = "";
-        folder = "";
-        inDelRegNumCsv = "";
-        outDelRegNumCsv = "";
-        rejectedDelRegNumCsv = "";
-        autodelRegNumCsv = "";
-        regNumCsv = "";
-        inDelSebraCodesCsv = "";
-        outDelSebraCodesCsv = "";
-        sebraCodesCsv = "";
-        autodelDelSebraCodesCsv = "";
+
+        inPreprocData = "";     // Предварителна обработка - Файл с Данни (Входящ csv файл - за обраборка)
+        outPreprocData = "";    // Предварителна обработка - Файл с Данни (Изходящ csv файл - обработен)
+        inPreprocAdm = "";      // Предварителна обработка - Файл с Администрации (Входящ csv файл - за обраборка)
+        outPreprocAdm = "";     // Предварителна обработка - Файл с Администрации (Изходящ csv файл - обработен)
+        inAnonymData = "";      // Анонимизация - Файл с Данни (Входящ csv файл - за обраборка)
+        outAnonymData = "";     // Анонимизация - Файл с Данни (Изходящ csv файл - обработен)
+        inAnonymAdm = "";       // Анонимизация - Файл с Администрации (Входящ csv файл - за обраборка)
+        inCheckData = "";       // Проверка в МЕУ - Файл с Данни (Входящ csv файл - за обраборка)
+        outCheckData = "";      // Проверка в МЕУ - Файл с Данни (Изходящ csv файл - обработен)
+        folder = "";            // Папка
 
         // KeyPairGenerator generator = null;
         // KeyPair pair;
@@ -180,82 +212,63 @@ public class Sebra extends javax.swing.JFrame {
         //     Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
         // }
 
-        removeDataGeneralStatisticsTextArea();
-        taText = " 1. Изберете: Входящ файл!";
+        Calendar calendar;
+        Date dDate = null;
+        Date dCurrentDate = null;
+        java.sql.Date sqlCurrentDate = null;
+        String sCurrentDate = "";
+        String sSqlCurrentDate = "";
+        calendar = Calendar.getInstance();
+        dDate = calendar.getTime();
+        setCurrentDate(dDate);
+        dCurrentDate = getCurrentDate();
+        sCurrentDate = dateFormat.format(dCurrentDate);
+        sqlCurrentDate = new java.sql.Date(dCurrentDate.getTime());
+        sSqlCurrentDate = sqlCurrentDate.toString();
+        SimpleDateFormat format_log = new SimpleDateFormat("yyyy_MM");
+        try {
+            log.setLevel(Level.ALL);
+            fh = new FileHandler(basePathLog + "RIR_" + format_log.format(Calendar.getInstance().getTime()) + ".log", true);
+        } catch (IOException | SecurityException e) {
+            System.out.println("IOException: " + e.getMessage());
+            log.log(Level.WARNING, "IOException: " + e.getMessage());
+        }
+        fh.setFormatter(new SimpleFormatter());
+        fh.setLevel(Level.ALL);
+        log.addHandler(fh);
+        log.setUseParentHandlers(false);
+        log.info("Sebra_Anonymizer " + sCurrentDate + "");
+        taText = " " + sCurrentDate + "";
         setDataGeneralStatisticsTextArea(taText);
-        taText = " 2. Изберете: Файл с АО!";
+        taText = "------------------------";
+        setDataGeneralStatisticsTextArea(taText);
+        taText = " ▬ В БОРИКА ▬ ";
+        setDataGeneralStatisticsTextArea(taText);
+        taText = "··························";
+        setDataGeneralStatisticsTextArea(taText);
+        taText = " • Изберете: ";
+        setDataGeneralStatisticsTextArea(taText);
+        taText = " 1. Файл с данни!";
+        setDataGeneralStatisticsTextArea(taText);
+        taText = " 2. Файл с АО!";
         setDataGeneralStatisticsTextArea(taText);
         taText = " 3. Стартирайте: Анонимизиране на данните!";
         setDataGeneralStatisticsTextArea(taText);
-        taText = "------------------------------------------------------------------------------------------------------------------";
+        taText = "============================================";
         setDataGeneralStatisticsTextArea(taText);
-        taText = " • Анонимизират се четири полета от получения файл от БОРИКА:";
+        taText = " ▬ В МЕУ ▬ ";
         setDataGeneralStatisticsTextArea(taText);
-        taText = "   - CLIENT_RECEIVER_NAME (Наименование на получателя)";
+        taText = "··························";
         setDataGeneralStatisticsTextArea(taText);
-        taText = "   - CLIENT_RECEIVER_ACC (IBAN на бенефициента)";
+        taText = " • Изберете: ";
         setDataGeneralStatisticsTextArea(taText);
-        taText = "   - REASON1 (Основание за плащане I)";
+        taText = " 1. Файл с анонимизирани данни!";
         setDataGeneralStatisticsTextArea(taText);
-        taText = "   - REASON2 (Основание за плащане II)";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = " • CLIENT_RECEIVER_NAME:";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "   - Проверява се за име на ФЛ - заменя се с: 'Физическо лице', само имената.";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "   - Проверява се за ЕГН:";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "     ⯈ Абревиатурата ЕГН се изтрива;";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "     ⯈ 10-те цифри се проверяват за валидно ЕГН и ако то е такова:";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "         ⯮ Десетцифрената стойност на ЕГН-то се криптира с публичен ключ (RSA public-key) от двойка ключове: публичен и частен;";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "         ⯮ 10-те цифри се заменят с абревиатура: 'ЕГН' + хеш кода на криптираната стойност на ЕГН-то, по абсолютна стойност;";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "     ⯈ Ако пред 10-те цифри стои абревиатура ЕГН, то тя се изтрива, а цифрите не се проверяват за валидно ЕГН, като:";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "         ⯮ Десетцифрената стойност на ЕГН-то се криптира с публичен ключ (RSA public-key) от двойка ключове: публичен и частен;";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "         ⯮ 10-те цифри се заменят с абревиатура: 'ЕГН' + хеш кода на криптираната стойност на ЕГН-то, по абсолютна стойност;";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = " • CLIENT_RECEIVER_ACC:";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "   - Ако CLIENT_RECEIVER_NAME = 'Физическо лице', то CLIENT_RECEIVER_ACC се заменят с: абсолютната стойност на хеш кода на криптираната стойност (RSA public-key) на IBAN-a на Физическото лице.";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "   - Ако CLIENT_RECEIVER_NAME <> 'Физическо лице', то CLIENT_RECEIVER_ACC не се променя.";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = " • REASON1, REASON2:";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "   - Проверява се за име на ФЛ - заменя се с: 'Физическо лице', само имената.";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "   - Проверява се за ЕГН:";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "     ⯈ Абревиатурата ЕГН се изтрива;";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "     ⯈ 10-те цифри се проверяват за валидно ЕГН и ако то е такова:";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "         ⯮ Десетцифрената стойност на ЕГН-то се криптира с публичен ключ (RSA public-key) от двойка ключове: публичен и частен;";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "         ⯮ 10-те цифри се заменят с абревиатура: 'ЕГН' + хеш кода на криптираната стойност на ЕГН-то, по абсолютна стойност;";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "     ⯈ Ако пред 10-те цифри стои абревиатура ЕГН, то тя се изтрива, а цифрите не се проверяват за валидно ЕГН, като:";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "         ⯮ Десетцифрената стойност на ЕГН-то се криптира с публичен ключ (RSA public-key) от двойка ключове: публичен и частен;";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "         ⯮ 10-те цифри се заменят с абревиатура: 'ЕГН' + хеш кода на криптираната стойност на ЕГН-то, по абсолютна стойност;";
-        setDataGeneralStatisticsTextArea(taText);
-        taText = "   - Проверява се за адрес - заменя се със: 'Адрес', цялото поле.";
+        taText = " 2. Проверката се стартира автоматично!";
         setDataGeneralStatisticsTextArea(taText);
         taText = "------------------------------------------------------------------------------------------------------------------";
         setDataGeneralStatisticsTextArea(taText);
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED>1.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Входящ&nbsp;файл!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>2.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Файл&nbsp;с&nbsp;АО!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>3.</FONT></b>&nbsp;<b>Стартирайте:</b>&nbsp;<i><FONT COLOR=BLUE>Анонимизиране&nbsp;на&nbsp;данните!</FONT></i></html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED>1.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Файл&nbsp;с&nbsp;данни!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>2.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Файл&nbsp;с&nbsp;АО!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>3.</FONT></b>&nbsp;<b>Стартирайте:</b>&nbsp;<i><FONT COLOR=BLUE>Анонимизиране&nbsp;на&nbsp;данните!</FONT></i></html>";
         setStatusLabel(slText);
     }
 
@@ -276,14 +289,11 @@ public class Sebra extends javax.swing.JFrame {
         statusLabel = new javax.swing.JLabel();
         sebraMenuBar = new javax.swing.JMenuBar();
         menuChoiceFile = new javax.swing.JMenu();
-        menuDeleteRegNum = new javax.swing.JMenu();
-        choiceInDelRegNumFile = new javax.swing.JMenuItem();
-        choiceRegNumFile = new javax.swing.JMenuItem();
-        menuDeleteSebraCode = new javax.swing.JMenu();
-        choiceInDelSebraCodesFile = new javax.swing.JMenuItem();
-        choiceSebraCodesFile = new javax.swing.JMenuItem();
-        menuInCsv = new javax.swing.JMenuItem();
-        menuOrgCsv = new javax.swing.JMenuItem();
+        menuAnonymization = new javax.swing.JMenu();
+        mAnonymData = new javax.swing.JMenuItem();
+        mAnonymAdministrations = new javax.swing.JMenuItem();
+        menuCheckMeu = new javax.swing.JMenu();
+        mCheckData = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
         About = new javax.swing.JMenu();
         menuAbout = new javax.swing.JMenu();
@@ -364,75 +374,47 @@ public class Sebra extends javax.swing.JFrame {
             }
         });
 
-        menuDeleteRegNum.setText("Изтриване по: Номер на регистрация");
-        menuDeleteRegNum.setToolTipText("");
-        menuDeleteRegNum.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        menuAnonymization.setText("Анонимизация");
+        menuAnonymization.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        menuAnonymization.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
 
-        choiceInDelRegNumFile.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        choiceInDelRegNumFile.setText("Избери: Файл за изтриване");
-        choiceInDelRegNumFile.setToolTipText("");
-        choiceInDelRegNumFile.addActionListener(new java.awt.event.ActionListener() {
+        mAnonymData.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        mAnonymData.setText("Избор: Файл с Данни");
+        mAnonymData.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        mAnonymData.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                choiceInDelRegNumFileActionPerformed(evt);
+                mAnonymDataActionPerformed(evt);
             }
         });
-        menuDeleteRegNum.add(choiceInDelRegNumFile);
+        menuAnonymization.add(mAnonymData);
 
-        choiceRegNumFile.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        choiceRegNumFile.setText("Избери: Файл с номера на регистрация");
-        choiceRegNumFile.addActionListener(new java.awt.event.ActionListener() {
+        mAnonymAdministrations.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        mAnonymAdministrations.setText("Избор: Файл с Администрации");
+        mAnonymAdministrations.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        mAnonymAdministrations.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                choiceRegNumFileActionPerformed(evt);
+                mAnonymAdministrationsActionPerformed(evt);
             }
         });
-        menuDeleteRegNum.add(choiceRegNumFile);
+        menuAnonymization.add(mAnonymAdministrations);
 
-        menuChoiceFile.add(menuDeleteRegNum);
+        menuChoiceFile.add(menuAnonymization);
 
-        menuDeleteSebraCode.setText("Изтриване по: Sebra Code");
-        menuDeleteSebraCode.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        menuCheckMeu.setText("Проверка в МЕУ");
+        menuCheckMeu.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        menuCheckMeu.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
 
-        choiceInDelSebraCodesFile.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        choiceInDelSebraCodesFile.setText("Избери: Файл за изтриване");
-        choiceInDelSebraCodesFile.setToolTipText("");
-        choiceInDelSebraCodesFile.addActionListener(new java.awt.event.ActionListener() {
+        mCheckData.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        mCheckData.setText("Избор: Файл с Данни");
+        mCheckData.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        mCheckData.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                choiceInDelSebraCodesFileActionPerformed(evt);
+                mCheckDataActionPerformed(evt);
             }
         });
-        menuDeleteSebraCode.add(choiceInDelSebraCodesFile);
+        menuCheckMeu.add(mCheckData);
 
-        choiceSebraCodesFile.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        choiceSebraCodesFile.setText("Избери: Файл със Sebra Codes");
-        choiceSebraCodesFile.setToolTipText("");
-        choiceSebraCodesFile.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                choiceSebraCodesFileActionPerformed(evt);
-            }
-        });
-        menuDeleteSebraCode.add(choiceSebraCodesFile);
-
-        menuChoiceFile.add(menuDeleteSebraCode);
-
-        menuInCsv.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        menuInCsv.setText("Входящ файл");
-        menuInCsv.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        menuInCsv.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuInCsvActionPerformed(evt);
-            }
-        });
-        menuChoiceFile.add(menuInCsv);
-
-        menuOrgCsv.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        menuOrgCsv.setText("Файл с АО");
-        menuOrgCsv.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        menuOrgCsv.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuOrgCsvActionPerformed(evt);
-            }
-        });
-        menuChoiceFile.add(menuOrgCsv);
+        menuChoiceFile.add(menuCheckMeu);
 
         sebraMenuBar.add(menuChoiceFile);
 
@@ -464,250 +446,39 @@ public class Sebra extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void menuInCsvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuInCsvActionPerformed
-        // Selecting an incoming file to anonymize!
-        File selectedFile = null;
-        String nameFile = null;
-        String onlyNameFile = null;
-        String msg = null;
-        String error_text = null;
-        JFileChooser fileChooser = null;
-        folder = this.getPathFolder();
-        if (folder.equals(null) || folder.equals("")) {
-            folder = System.getProperty("user.home").toString();
-        }
-        fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new File(folder));
-        fileChooser.setFileFilter(new FileNameExtensionFilter("csv", "CSV"));
-        int result = fileChooser.showOpenDialog(this);
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            try {
-                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-                selectedFile = fileChooser.getSelectedFile();
-                inCsv = selectedFile.getAbsolutePath();
-                nameFile = selectedFile.getName();
-                folder = selectedFile.getParent();
-                String[] res = nameFile.split("[.]", 0);
-                onlyNameFile = res[0];
-                saltTxt = folder + "\\" + "salt" + ".txt";
-                outCsv = folder + "\\" + "anonymized_" + onlyNameFile + ".csv";
-                pathOutCsv = Paths.get(outCsv);
-                this.setPathFolder(folder);
-                this.setPathInCsv(inCsv);
-                this.setPathSaltTxt(saltTxt);
-                this.setPathOutCsv(outCsv);
-                orgCsv = this.getPathOrgCsv();
-                taText = " • Избран файл: " + inCsv + "!";
-                setDataGeneralStatisticsTextArea(taText);
-                slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inCsv + "</FONT></html>";
-                setStatusLabel(slText);
-                pathInCsv = Paths.get(inCsv);
-                pathSaltTxt = Paths.get(saltTxt);
-                msg = "<html>&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inCsv + "</FONT></html>";
-                JOptionPane.showMessageDialog(f, msg);
-
-                if (!Files.exists(pathOutCsv)) {
-                    Files.createFile(pathOutCsv);
-                } else {
-                    Object[] options = {"Да, моля", "Не, разбира се!"};
-                    msg = "<html><center><b><FONT COLOR=RED>За избрания входящ файл, вече има генериран анонимизиран изходен файл!</FONT></b><br><FONT COLOR=BLUE>Желаете ли генериране на нов анонимизиран изходен файл и препокриване на съществуващия?</FONT></center></html>";
-                    int num_opt = JOptionPane.showOptionDialog(f, msg, "Уместен въпрос", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-                    switch (num_opt) {
-                        case JOptionPane.YES_OPTION:
-                            break;
-                        case JOptionPane.NO_OPTION:
-                            msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
-                            JOptionPane.showMessageDialog(f, msg);
-                            clearStatusLabel();
-                            return;
-                        default:
-                            msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
-                            JOptionPane.showMessageDialog(f, msg);
-                            clearStatusLabel();
-                            return;
-                    }
-                }
-
-                if (orgCsv.equals(null) || orgCsv.equals("")) {  // No Organizations file selected!  // Unable to start anonymization!
-                    //
-                } else {  // Organizations file selected!  // Anonymization can begin!
-                    slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избрани файлове:&nbsp;&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inCsv + "&nbsp;&nbsp;•&nbsp;" + orgCsv + "</FONT><html>";
-                    setStatusLabel(slText);
-                    pathOrgCsv = Paths.get(orgCsv);
-                    Object[] options = {"Да, моля", "Няма начин!"};
-                    msg = "<html><i><b><FONT COLOR=BLUE>Да започне ли анонимизацията на избрания файл?</FONT></b></i></html>";
-                    int num_opt = JOptionPane.showOptionDialog(f, msg, "Уместен въпрос", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-                    if (num_opt == JOptionPane.YES_OPTION) {
-                        makeAnonymization();
-                    } else if (num_opt == JOptionPane.NO_OPTION) {
-                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
-                        JOptionPane.showMessageDialog(f, msg);
-                        clearStatusLabel();
-                    } else {
-                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
-                        JOptionPane.showMessageDialog(f, msg);
-                        clearStatusLabel();
-                    }
-                }
-
-                if (!Files.exists(pathSaltTxt)) {
-                    Files.createFile(pathSaltTxt);
-                }
-                File file = new File(saltTxt);
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                while ((salt = br.readLine()) != null) {
-                }
-                if (StringUtils.isBlank(salt)) {
-                    salt = RandomStringUtils.randomAlphanumeric(300);
-                    try (FileOutputStream outputStream = new FileOutputStream(file)) {
-                        byte[] strToBytes = salt.getBytes();
-                        outputStream.write(strToBytes);
-                        outputStream.close();
-                    } catch (IOException ex) {
-                        error_text = ex.getMessage().toString();
-                        msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
-                        JOptionPane.showMessageDialog(f, msg);
-                    }
-                }
-
-                this.setCursor(Cursor.getDefaultCursor());
-            } catch (Exception ex) {
-                Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
-                error_text = ex.getMessage().toString();
-                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
-                JOptionPane.showMessageDialog(f, msg);
-                clearStatusLabel();
-            } finally {
-                try {
-                    this.setCursor(Cursor.getDefaultCursor());
-                } catch (Exception ex) {
-                    Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
-                    error_text = ex.getMessage().toString();
-                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
-                    JOptionPane.showMessageDialog(f, msg);
-                    clearStatusLabel();
-                }
-            }
-        }
-    }//GEN-LAST:event_menuInCsvActionPerformed
-
-    private void menuOrgCsvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuOrgCsvActionPerformed
-        // Select administrations file!
-        File selectedFile = null;
-        String nameFile = null;
-        String onlyNameFile = null;
-        String msg = null;
-        String error_text = null;
-        JFileChooser fileChooser = null;
-        folder = this.getPathFolder();
-        if (folder.equals(null) || folder.equals("")) {
-            folder = System.getProperty("user.home").toString();
-        }
-        fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new File(folder));
-        fileChooser.setFileFilter(new FileNameExtensionFilter("csv", "CSV"));
-        int result = fileChooser.showOpenDialog(this);
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            try {
-                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-                selectedFile = fileChooser.getSelectedFile();
-                orgCsv = selectedFile.getAbsolutePath();
-                nameFile = selectedFile.getName();
-                folder = selectedFile.getParent();
-                String[] res = nameFile.split("[.]", 0);
-                onlyNameFile = res[0];
-                this.setPathFolder(folder);
-                this.setPathOrgCsv(orgCsv);
-                inCsv = this.getPathInCsv();
-                saltTxt = this.getPathSaltTxt();
-                outCsv = this.getPathOutCsv();
-                if (inCsv.equals(null) || inCsv.equals("") || outCsv.equals("") || outCsv.equals("")) {  // No Incoming File or Outgoing File selected!  // Unable to start anonymization!
-                    slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + orgCsv + "</FONT><html>";
-                    setStatusLabel(slText);
-                    pathOrgCsv = Paths.get(orgCsv);
-                    msg = "<html>&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + orgCsv + "</FONT><html>";
-                    JOptionPane.showMessageDialog(f, msg);
-                } else {  // Selected Input and Output file!  // Anonymization can begin!
-                    taText = " • Избран файл: " + orgCsv + "!";
-                    setDataGeneralStatisticsTextArea(taText);
-                    taText = "------------------------------------------------------------------------------------------------------------------";
-                    setDataGeneralStatisticsTextArea(taText);
-                    slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избрани файлове:&nbsp;&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inCsv + "&nbsp;&nbsp;•&nbsp;" + orgCsv + "</FONT>";
-                    setStatusLabel(slText);
-                    pathInCsv = Paths.get(inCsv);
-                    pathOrgCsv = Paths.get(orgCsv);
-                    pathSaltTxt = Paths.get(saltTxt);
-                    pathOutCsv = Paths.get(outCsv);
-                    Object[] options = {"Да, моля", "Няма начин!"};
-                    msg = "<html><i><b><FONT COLOR=BLUE>Да започне ли анонимизацията на избрания файл?</FONT></b></i></html>";
-                    int num_opt = JOptionPane.showOptionDialog(f, msg, "Уместен въпрос", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-                    if (num_opt == JOptionPane.YES_OPTION) {
-                        makeAnonymization();
-                    } else if (num_opt == JOptionPane.NO_OPTION) {
-                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
-                        JOptionPane.showMessageDialog(f, msg);
-                        clearStatusLabel();
-                    } else {
-                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
-                        JOptionPane.showMessageDialog(f, msg);
-                        clearStatusLabel();
-                    }
-                }
-
-                this.setCursor(Cursor.getDefaultCursor());
-            } catch (Exception ex) {
-                Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
-                error_text = ex.getMessage().toString();
-                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
-                JOptionPane.showMessageDialog(f, msg);
-                clearStatusLabel();
-            } finally {
-                try {
-                    this.setCursor(Cursor.getDefaultCursor());
-                } catch (Exception ex) {
-                    Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
-                    error_text = ex.getMessage().toString();
-                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
-                    JOptionPane.showMessageDialog(f, msg);
-                    clearStatusLabel();
-                }
-            }
-        }
-    }//GEN-LAST:event_menuOrgCsvActionPerformed
-
     private void menuChoiceFileMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuChoiceFileMousePressed
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED>1.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Входящ&nbsp;файл!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>2.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Файл&nbsp;с&nbsp;АО!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>3.</FONT></b>&nbsp;<b>Стартирайте:</b>&nbsp;<i><FONT COLOR=BLUE>Анонимизиране&nbsp;на&nbsp;данните!</FONT></i></html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED>1.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Файл&nbsp;с&nbsp;данни!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>2.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Файл&nbsp;с&nbsp;АО!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>3.</FONT></b>&nbsp;<b>Стартирайте:</b>&nbsp;<i><FONT COLOR=BLUE>Анонимизиране&nbsp;на&nbsp;данните!</FONT></i></html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuChoiceFileMousePressed
 
     private void menuAboutMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMousePressed
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.07</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2025 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.10</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMousePressed
 
     private void menuChoiceFileMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuChoiceFileMouseEntered
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED>1.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Входящ&nbsp;файл!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>2.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Файл&nbsp;с&nbsp;АО!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>3.</FONT></b>&nbsp;<b>Стартирайте:</b>&nbsp;<i><FONT COLOR=BLUE>Анонимизиране&nbsp;на&nbsp;данните!</FONT></i></html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED>1.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Файл&nbsp;с&nbsp;данни!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>2.</FONT></b>&nbsp;<b>Изберете:</b>&nbsp;<i><FONT COLOR=BLUE>Файл&nbsp;с&nbsp;АО!</FONT></i>" + "&nbsp;&nbsp;&nbsp;&nbsp;<b><FONT COLOR=RED>3.</FONT></b>&nbsp;<b>Стартирайте:</b>&nbsp;<i><FONT COLOR=BLUE>Анонимизиране&nbsp;на&nbsp;данните!</FONT></i></html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuChoiceFileMouseEntered
 
     private void menuAboutMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuAboutMouseEntered
-        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2024 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.07</FONT></b>&nbsp;&nbsp;</html>";
+        slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN>&copy;&nbsp;</FONT></b><b><FONT COLOR=BLUE>2025 Ministry&nbsp;of&nbsp;e-Governance.&nbsp;All&nbsp;rights&nbsp;reserved.</FONT>&nbsp;&nbsp;<FONT COLOR=GREEN>Ver.1.10</FONT></b>&nbsp;&nbsp;</html>";
         setStatusLabel(slText);
     }//GEN-LAST:event_menuAboutMouseEntered
 
-    private void choiceInDelRegNumFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_choiceInDelRegNumFileActionPerformed
-        // Изтриване по: Номер на регистрация -> Избери: Файл за изтриване
-        // Delete by: Registration number -> Select: File to delete
+    private void mAnonymDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mAnonymDataActionPerformed
+        // Предварителна обработка | Избор: Файл с Данни ---------------------
         File selectedFile = null;
         String nameFile = null;
         String onlyNameFile = null;
         String msg = null;
         String error_text = null;
         JFileChooser fileChooser = null;
+        char ch = '|';
+        int idx = 0;
+        String line = "";
+        String newLine = "\r\n";
+        
         folder = this.getPathFolder();
         if (folder.equals(null) || folder.equals("")) {
             folder = System.getProperty("user.home").toString();
@@ -722,315 +493,690 @@ public class Sebra extends javax.swing.JFrame {
                 this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
                 selectedFile = fileChooser.getSelectedFile();
-                inDelRegNumCsv = selectedFile.getAbsolutePath();
+                inPreprocData = selectedFile.getAbsolutePath();
                 nameFile = selectedFile.getName();
                 folder = selectedFile.getParent();
                 String[] res = nameFile.split("[.]", 0);
                 onlyNameFile = res[0];
-                outDelRegNumCsv = folder + "\\" + "deleted_" + onlyNameFile + ".csv";
-                pathOutDelRegNumCsv = Paths.get(outDelRegNumCsv);
-                rejectedDelRegNumCsv = folder + "\\" + "rejected_" + onlyNameFile + ".csv";
-                pathRejectedDelRegNumCsv = Paths.get(rejectedDelRegNumCsv);
-                autodelRegNumCsv = folder + "\\" + "autodel_" + onlyNameFile + ".csv";
-                pathAutodelRegNumCsv = Paths.get(autodelRegNumCsv);
-
+                outPreprocData = folder + "\\" + "Replaced_" + onlyNameFile + ".csv";
+                pathOutPreprocData = Paths.get(outPreprocData);
+                pathInPreprocData = Paths.get(inPreprocData);
                 this.setPathFolder(folder);
-                this.setPathInDelRegNumCsv(inDelRegNumCsv);
-                this.setPathOutDelRegNumCsv(outDelRegNumCsv);
-                this.setPathRejectedDelRegNumCsv(rejectedDelRegNumCsv);
-                this.setPathAutodelRegNumCsv(autodelRegNumCsv);
+                this.setOnlyNameFileData(onlyNameFile);
+                this.setInPreprocData(inPreprocData);
+                this.setOutPreprocData(outPreprocData);
+                this.setPathOutPreprocData(pathOutPreprocData);
+                this.setPathInPreprocData(pathInPreprocData);
 
-                taText = " • Избран файл: " + inDelRegNumCsv + "!";
+                if (!Files.exists(pathOutPreprocData)) {
+                    Files.createFile(pathOutPreprocData);
+                }
+
+                taText = " • Избран файл: " + inPreprocData + "!";
                 setDataGeneralStatisticsTextArea(taText);
-                slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelRegNumCsv + "</FONT></html>";
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + onlyNameFile + "</FONT></html>";
                 setStatusLabel(slText);
-                pathInCsv = Paths.get(inDelRegNumCsv);
-                msg = "<html>&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelRegNumCsv + "</FONT></html>";
-                JOptionPane.showMessageDialog(f, msg);
+                log.info("Избран файл: " + inPreprocData + "!");
 
-                if (!Files.exists(pathOutDelRegNumCsv)) {
-                    Files.createFile(pathOutDelRegNumCsv);
+                OutputStreamWriter writer = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outPreprocData)), StandardCharsets.UTF_8);
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inPreprocData), "utf-8"));
+                while ((line = br.readLine()) != null) {
+                    try {
+                        idx = line.indexOf(ch);
+                        if (idx == -1) {
+                            log.log(Level.WARNING, "Error: " + error_text);
+                            taText = "Записът не отговаря на верния формат!";
+                            setDataGeneralStatisticsTextArea(taText);
+                            taText = "------------------------------------------------------------------------------------------------------------------";
+                            setDataGeneralStatisticsTextArea(taText);
+                            slText = "<html><FONT COLOR=RED><b>Записът не отговаря на верния формат!</b></FONT></html>";
+                            setStatusLabel(slText);
+                            msg = "<html><FONT COLOR=RED><b>Записът не отговаря на верния формат!</b></FONT></html>";
+                            JOptionPane.showMessageDialog(f, msg);
+                            return;
+                        }
+                        
+                        line = line.replaceAll(",", " ");
+                        line = line.replaceAll("\"", "");
+                        line = line.replaceAll("'", "");
+                        line = line.replaceAll("\\|", ",");
+
+                        writer.write(line);
+                        writer.write(newLine);
+                    } catch (Exception ex) {
+                        error_text = ex.getMessage().toString();
+                        log.log(Level.WARNING, "Error: " + error_text);
+                        taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                        setDataGeneralStatisticsTextArea(taText);
+                        taText = "------------------------------------------------------------------------------------------------------------------";
+                        setDataGeneralStatisticsTextArea(taText);
+                        slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                        setStatusLabel(slText);
+                        msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                        JOptionPane.showMessageDialog(f, msg);
+                        return;
+                    }
                 }
-                if (!Files.exists(pathRejectedDelRegNumCsv)) {
-                    Files.createFile(pathRejectedDelRegNumCsv);
-                }
-                if (!Files.exists(pathAutodelRegNumCsv)) {
-                    Files.createFile(pathAutodelRegNumCsv);
-                }
+                br.close();
+                writer.close();
+
+                salt = RandomStringUtils.randomAlphanumeric(300);
+                setSalt(salt);
 
                 this.setCursor(Cursor.getDefaultCursor());
-            } catch (Exception ex) {
-                Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+                log.info("Предварителната обработка на Файл: " + inPreprocData + " завърши успешно!");
+                log.info("Обработените данни са записани във файл: " + outPreprocData + "!");
+                taText = "Предварителната обработка на Файл: " + inPreprocData + " завърши успешно!";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "Обработените данни са записани във файл: " + outPreprocData + "!";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html>&nbsp;<b><FONT COLOR=GREEN>Предварителната обработка на Файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + onlyNameFile + "</FONT><FONT COLOR=GREEN>&nbsp;завърши успешно!</FONT></html>";
+                setStatusLabel(slText);
+                msg = "<html>&nbsp;<b><FONT COLOR=GREEN>Предварителната обработка на Файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inPreprocData + "</FONT><FONT COLOR=GREEN>&nbsp;завърши успешно!</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+            } catch (FileNotFoundException ex) {
                 error_text = ex.getMessage().toString();
+                log.log(Level.WARNING, "Error: " + error_text);
+                taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                setStatusLabel(slText);
                 msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
                 JOptionPane.showMessageDialog(f, msg);
-                clearStatusLabel();
+            } catch (UnsupportedEncodingException ex) {
+                error_text = ex.getMessage().toString();
+                log.log(Level.WARNING, "Error: " + error_text);
+                taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                setStatusLabel(slText);
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+            } catch (Exception ex) {
+                error_text = ex.getMessage().toString();
+                log.log(Level.WARNING, "Error: " + error_text);
+                taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                setStatusLabel(slText);
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
             } finally {
                 try {
                     this.setCursor(Cursor.getDefaultCursor());
                 } catch (Exception ex) {
-                    Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
                     error_text = ex.getMessage().toString();
-                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
-                    JOptionPane.showMessageDialog(f, msg);
-                    clearStatusLabel();
-                }
-            }
-        }
-    }//GEN-LAST:event_choiceInDelRegNumFileActionPerformed
-
-    private void choiceRegNumFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_choiceRegNumFileActionPerformed
-        // Изтриване по: Номер на регистрация -> Избери: Файл с номера на регистрация
-        // Delete by: Registration Number -> Select: File with Registration Number
-        File selectedFile = null;
-        String nameFile = null;
-        String onlyNameFile = null;
-        String msg = null;
-        String error_text = null;
-        JFileChooser fileChooser = null;
-        folder = this.getPathFolder();
-        if (folder.equals(null) || folder.equals("")) {
-            folder = System.getProperty("user.home").toString();
-        }
-        fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new File(folder));
-        fileChooser.setFileFilter(new FileNameExtensionFilter("csv", "CSV"));
-        int result = fileChooser.showOpenDialog(this);
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            try {
-                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-                selectedFile = fileChooser.getSelectedFile();
-                regNumCsv = selectedFile.getAbsolutePath();
-                nameFile = selectedFile.getName();
-                folder = selectedFile.getParent();
-                String[] res = nameFile.split("[.]", 0);
-                onlyNameFile = res[0];
-                this.setPathFolder(folder);
-                this.setPathRegNumCsv(regNumCsv);
-                inDelRegNumCsv = this.getPathInDelRegNumCsv();
-                outDelRegNumCsv = this.getPathOutDelRegNumCsv();
-                rejectedDelRegNumCsv = this.getPathRejectedDelRegNumCsv();
-                autodelRegNumCsv = this.getPathAutodelRegNumCsv();
-
-                if (inDelRegNumCsv.equals(null) || inDelRegNumCsv.equals("") || outDelRegNumCsv.equals("") || outDelRegNumCsv.equals("")) {  // No Incoming File or Outgoing File selected!  // Unable to start deletion!
-                    slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED></FONT><FONT COLOR=RED>Няма избран файл за изтриване по номер на регистрация!:&nbsp;</FONT></b><html>";
-                    setStatusLabel(slText);
-                    pathRegNumCsv = Paths.get(regNumCsv);
-                    msg = "<html>&nbsp;<b><FONT COLOR=RED></FONT><FONT COLOR=RED>Няма избран файл за изтриване по номер на регистрация!&nbsp;</FONT></b><html>";
-                    JOptionPane.showMessageDialog(f, msg);
-                } else {  // Selected Input and Output file!  // Anonymization can begin!
-                    taText = " • Избран файл: " + regNumCsv + "!";
+                    log.log(Level.WARNING, "Error: " + error_text);
+                    taText = "Съжаляваме, възникна грешка: " + error_text + "";
                     setDataGeneralStatisticsTextArea(taText);
                     taText = "------------------------------------------------------------------------------------------------------------------";
                     setDataGeneralStatisticsTextArea(taText);
-                    slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избрани файлове:&nbsp;&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelRegNumCsv + "&nbsp;&nbsp;•&nbsp;" + regNumCsv + "</FONT>";
+                    slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
                     setStatusLabel(slText);
-                    pathInDelRegNumCsv = Paths.get(inDelRegNumCsv);
-                    pathRegNumCsv = Paths.get(regNumCsv);
-                    pathOutDelRegNumCsv = Paths.get(outDelRegNumCsv);
-                    pathRejectedDelRegNumCsv = Paths.get(rejectedDelRegNumCsv);
-                    pathAutodelRegNumCsv = Paths.get(autodelRegNumCsv);
+                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                }
+            }
+        }
+        // Предварителна обработка | Избор: Файл с Данни ---------------------
+    }//GEN-LAST:event_mAnonymDataActionPerformed
 
-                    Object[] options = {"Да, моля", "Няма начин!"};
-                    msg = "<html><i><b><FONT COLOR=BLUE>Да започне ли изтриването на избрания файл?</FONT></b></i></html>";
-                    int num_opt = JOptionPane.showOptionDialog(f, msg, "Уместен въпрос", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-                    if (num_opt == JOptionPane.YES_OPTION) {
-                        makeDeletionByRegistrationNumber();
-                    } else if (num_opt == JOptionPane.NO_OPTION) {
-                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
+    private void mAnonymAdministrationsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mAnonymAdministrationsActionPerformed
+        // Предварителна обработка | Избор: Файл с Администрации -------------
+        File selectedFile = null;
+        String nameFile = null;
+        String onlyNameFile = null;
+        JFileChooser fileChooser = null;
+        String msg = null;
+        String error_text = null;
+        char ch = '|';
+        int idx = 0;
+        String line = "";
+        String newLine = "\r\n";
+
+        pathOutPreprocData = this.getPathOutPreprocData();
+        if (!Files.exists(pathOutPreprocData)) {
+            log.log(Level.WARNING, "Не е намерен обработения файл с Данни!");
+            taText = "Не е намерен обработения файл с Данни!";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html><FONT COLOR=RED><b>Не е намерен обработения файл с Данни!</b></FONT></html>";
+            setStatusLabel(slText);
+            msg = "<html><FONT COLOR=RED><b>Не е намерен обработения файл с Данни!</b></FONT></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            return;
+        }
+
+        folder = this.getPathFolder();
+        if (folder.equals(null) || folder.equals("")) {
+            folder = System.getProperty("user.home").toString();
+        }
+        fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(folder));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("csv", "CSV"));
+        int result = fileChooser.showOpenDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            try {
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+                selectedFile = fileChooser.getSelectedFile();
+                inPreprocAdm = selectedFile.getAbsolutePath();
+                nameFile = selectedFile.getName();
+                folder = selectedFile.getParent();
+                String[] res = nameFile.split("[.]", 0);
+                onlyNameFile = res[0];
+                outPreprocAdm = folder + "\\" + "Replaced_" + onlyNameFile + ".csv";
+                pathOutPreprocAdm = Paths.get(outPreprocAdm);
+                pathInPreprocAdm = Paths.get(inPreprocAdm);
+                this.setOnlyNameFileAdm(onlyNameFile);
+                this.setInPreprocAdm(inPreprocAdm);
+                this.setOutPreprocAdm(outPreprocAdm);
+                this.setPathOutPreprocAdm(pathOutPreprocAdm);
+                this.setPathInPreprocAdm(pathInPreprocAdm);
+
+                if (!Files.exists(pathOutPreprocAdm)) {
+                    Files.createFile(pathOutPreprocAdm);
+                }
+
+                taText = " • Избран файл: " + inPreprocAdm + "!";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + onlyNameFile + "</FONT></html>";
+                setStatusLabel(slText);
+                log.info("Избран файл: " + inPreprocAdm + "!");
+
+                OutputStreamWriter writer = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outPreprocAdm)), StandardCharsets.UTF_8);
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inPreprocAdm), "utf-8"));
+                while ((line = br.readLine()) != null) {
+                    try {
+                        idx = line.indexOf(ch);
+                        if (idx == -1) {
+                            log.log(Level.WARNING, "Error: " + error_text);
+                            taText = "Записът не отговаря на верния формат!";
+                            setDataGeneralStatisticsTextArea(taText);
+                            taText = "------------------------------------------------------------------------------------------------------------------";
+                            setDataGeneralStatisticsTextArea(taText);
+                            slText = "<html><FONT COLOR=RED><b>Записът не отговаря на верния формат!</b></FONT></html>";
+                            setStatusLabel(slText);
+                            msg = "<html><FONT COLOR=RED><b>Записът не отговаря на верния формат!</b></FONT></html>";
+                            JOptionPane.showMessageDialog(f, msg);
+                            return;
+                        }
+                        
+                        line = line.replaceAll(",", " ");
+                        line = line.replaceAll("\"", "");
+                        line = line.replaceAll("'", "");
+                        line = line.replaceAll("\\|", ",");
+
+                        writer.write(line);
+                        writer.write(newLine);
+                    } catch (Exception ex) {
+                        error_text = ex.getMessage().toString();
+                        log.log(Level.WARNING, "Error: " + error_text);
+                        taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                        setDataGeneralStatisticsTextArea(taText);
+                        taText = "------------------------------------------------------------------------------------------------------------------";
+                        setDataGeneralStatisticsTextArea(taText);
+                        slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                        setStatusLabel(slText);
+                        msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
                         JOptionPane.showMessageDialog(f, msg);
-                        clearStatusLabel();
-                    } else {
-                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
-                        JOptionPane.showMessageDialog(f, msg);
-                        clearStatusLabel();
+                        return;
                     }
                 }
+                br.close();
+                writer.close();
 
                 this.setCursor(Cursor.getDefaultCursor());
-            } catch (Exception ex) {
-                Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
-                error_text = ex.getMessage().toString();
-                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
-                JOptionPane.showMessageDialog(f, msg);
-                clearStatusLabel();
-            } finally {
-                try {
-                    this.setCursor(Cursor.getDefaultCursor());
-                } catch (Exception ex) {
-                    Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
-                    error_text = ex.getMessage().toString();
-                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
-                    JOptionPane.showMessageDialog(f, msg);
-                    clearStatusLabel();
-                }
-            }
-        }
-    }//GEN-LAST:event_choiceRegNumFileActionPerformed
-
-    private void choiceInDelSebraCodesFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_choiceInDelSebraCodesFileActionPerformed
-        // Изтриване по: Sebra Code -> Избери: Файл за изтриване
-        // Delete by: Sebra Code -> Select: File to delete
-        File selectedFile = null;
-        String nameFile = null;
-        String onlyNameFile = null;
-        String msg = null;
-        String error_text = null;
-        JFileChooser fileChooser = null;
-        folder = this.getPathFolder();
-        if (folder.equals(null) || folder.equals("")) {
-            folder = System.getProperty("user.home").toString();
-        }
-        fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new File(folder));
-        fileChooser.setFileFilter(new FileNameExtensionFilter("csv", "CSV"));
-        int result = fileChooser.showOpenDialog(this);
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            try {
-                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-                selectedFile = fileChooser.getSelectedFile();
-                inDelSebraCodesCsv = selectedFile.getAbsolutePath();
-                nameFile = selectedFile.getName();
-                folder = selectedFile.getParent();
-                String[] res = nameFile.split("[.]", 0);
-                onlyNameFile = res[0];
-                outDelSebraCodesCsv = folder + "\\" + "deleted_" + onlyNameFile + ".csv";
-                pathOutDelSebraCodesCsv = Paths.get(outDelSebraCodesCsv);
-                autodelDelSebraCodesCsv = folder + "\\" + "autodel_" + onlyNameFile + ".csv";
-                pathAutodelSebraCodesCsv = Paths.get(autodelDelSebraCodesCsv);
-                this.setPathFolder(folder);
-                this.setPathInDelSebraCodesCsv(inDelSebraCodesCsv);
-                this.setPathOutDelSebraCodesCsv(outDelSebraCodesCsv);
-                this.setPathAutodelSebraCodesCsv(autodelDelSebraCodesCsv);
-
-                taText = " • Избран файл: " + inDelSebraCodesCsv + "!";
+                log.info("Предварителната обработка на Файл: " + inPreprocAdm + " завърши успешно!");
+                log.info("Обработените данни са записани във файл: " + outPreprocAdm + "!");
+                taText = "Предварителната обработка на Файл: " + inPreprocAdm + " завърши успешно!";
                 setDataGeneralStatisticsTextArea(taText);
-                slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelSebraCodesCsv + "</FONT></html>";
+                taText = "Обработените данни са записани във файл: " + outPreprocAdm + "!";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html>&nbsp;<b><FONT COLOR=GREEN>Предварителната обработка на Файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + onlyNameFile + "</FONT><FONT COLOR=GREEN>&nbsp;завърши успешно!</FONT></html>";
                 setStatusLabel(slText);
-                pathInCsv = Paths.get(inDelSebraCodesCsv);
-                msg = "<html>&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelSebraCodesCsv + "</FONT></html>";
+                msg = "<html>&nbsp;<b><FONT COLOR=GREEN>Предварителната обработка на Файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inPreprocAdm + "</FONT><FONT COLOR=GREEN>&nbsp;завърши успешно!</FONT></html>";
                 JOptionPane.showMessageDialog(f, msg);
-
-                if (!Files.exists(pathOutDelSebraCodesCsv)) {
-                    Files.createFile(pathOutDelSebraCodesCsv);
-                }
-                if (!Files.exists(pathAutodelSebraCodesCsv)) {
-                    Files.createFile(pathAutodelSebraCodesCsv);
-                }
-
+            } catch (FileNotFoundException ex) {
                 this.setCursor(Cursor.getDefaultCursor());
-            } catch (Exception ex) {
-                Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
                 error_text = ex.getMessage().toString();
+                log.log(Level.WARNING, "Error: " + error_text);
+                taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                setStatusLabel(slText);
                 msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
                 JOptionPane.showMessageDialog(f, msg);
-                clearStatusLabel();
+            } catch (UnsupportedEncodingException ex) {
+                this.setCursor(Cursor.getDefaultCursor());
+                error_text = ex.getMessage().toString();
+                log.log(Level.WARNING, "Error: " + error_text);
+                taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                setStatusLabel(slText);
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+            } catch (Exception ex) {
+                this.setCursor(Cursor.getDefaultCursor());
+                error_text = ex.getMessage().toString();
+                log.log(Level.WARNING, "Error: " + error_text);
+                taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                setStatusLabel(slText);
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
             } finally {
                 try {
                     this.setCursor(Cursor.getDefaultCursor());
                 } catch (Exception ex) {
-                    Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
                     error_text = ex.getMessage().toString();
-                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
-                    JOptionPane.showMessageDialog(f, msg);
-                    clearStatusLabel();
-                }
-            }
-        }
-    }//GEN-LAST:event_choiceInDelSebraCodesFileActionPerformed
-
-    private void choiceSebraCodesFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_choiceSebraCodesFileActionPerformed
-        // Изтриване по: Sebra Code -> Избери: Файл със Sebra Codes
-        // Delete by: Sebra Code -> Select: File with Sebra Codes
-        File selectedFile = null;
-        String nameFile = null;
-        String onlyNameFile = null;
-        String msg = null;
-        String error_text = null;
-        JFileChooser fileChooser = null;
-        folder = this.getPathFolder();
-        if (folder.equals(null) || folder.equals("")) {
-            folder = System.getProperty("user.home").toString();
-        }
-        fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new File(folder));
-        fileChooser.setFileFilter(new FileNameExtensionFilter("csv", "CSV"));
-        int result = fileChooser.showOpenDialog(this);
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            try {
-                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-                selectedFile = fileChooser.getSelectedFile();
-                sebraCodesCsv = selectedFile.getAbsolutePath();
-                nameFile = selectedFile.getName();
-                folder = selectedFile.getParent();
-                String[] res = nameFile.split("[.]", 0);
-                onlyNameFile = res[0];
-                this.setPathFolder(folder);
-                this.setPathSebraCodesCsv(sebraCodesCsv);
-                inDelSebraCodesCsv = this.getPathInDelSebraCodesCsv();
-                outDelSebraCodesCsv = this.getPathOutDelSebraCodesCsv();
-                autodelDelSebraCodesCsv = this.getPathAutodelSebraCodesCsv();
-
-                if (inDelSebraCodesCsv.equals(null) || inDelSebraCodesCsv.equals("") || outDelSebraCodesCsv.equals("") || outDelSebraCodesCsv.equals("")) {  // No Incoming File or Outgoing File selected!  // Unable to start deletion!
-                    slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=RED></FONT><FONT COLOR=RED>Няма избран файл за изтриване по себра код!:&nbsp;</FONT></b><html>";
-                    setStatusLabel(slText);
-                    pathRegNumCsv = Paths.get(sebraCodesCsv);
-                    msg = "<html>&nbsp;<b><FONT COLOR=RED></FONT><FONT COLOR=RED>Няма избран файл за изтриване по себра код!&nbsp;</FONT></b><html>";
-                    JOptionPane.showMessageDialog(f, msg);
-                } else {  // Selected Input and Output file!  // Anonymization can begin!
-                    taText = " • Избран файл: " + sebraCodesCsv + "!";
+                    log.log(Level.WARNING, "Error: " + error_text);
+                    taText = "Съжаляваме, възникна грешка: " + error_text + "";
                     setDataGeneralStatisticsTextArea(taText);
                     taText = "------------------------------------------------------------------------------------------------------------------";
                     setDataGeneralStatisticsTextArea(taText);
-                    slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избрани файлове:&nbsp;&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + inDelSebraCodesCsv + "&nbsp;&nbsp;•&nbsp;" + sebraCodesCsv + "</FONT>";
+                    slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
                     setStatusLabel(slText);
-                    pathInDelSebraCodesCsv = Paths.get(inDelSebraCodesCsv);
-                    pathSebraCodesCsv = Paths.get(sebraCodesCsv);
-                    pathOutDelSebraCodesCsv = Paths.get(outDelSebraCodesCsv);
-                    pathAutodelSebraCodesCsv = Paths.get(autodelDelSebraCodesCsv);
+                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                }
+            }
+        }
+        // Предварителна обработка | Избор: Файл с Администрации -------------
+        // Анонимизация ------------------------------------------------------
+        taText = "Анонимизиране на данни!";
+        setDataGeneralStatisticsTextArea(taText);
+        taText = "------------------------------------------------------------------------------------------------------------------";
+        setDataGeneralStatisticsTextArea(taText);
+        slText = "<html>&nbsp;<b><FONT COLOR=GREEN>Анонимизиране на данни!</FONT></b></html>";
+        setStatusLabel(slText);
+        log.info("Анонимизиране на данни!");
 
-                    Object[] options = {"Да, моля", "Няма начин!"};
-                    msg = "<html><i><b><FONT COLOR=BLUE>Да започне ли изтриването на избрания файл?</FONT></b></i></html>";
-                    int num_opt = JOptionPane.showOptionDialog(f, msg, "Уместен въпрос", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-                    if (num_opt == JOptionPane.YES_OPTION) {
-                        makeDeletionBySebraCode();
-                    } else if (num_opt == JOptionPane.NO_OPTION) {
-                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
+        Object[] options = {"Да, моля", "Няма начин!"};
+        msg = "<html><i><b><FONT COLOR=BLUE>Да започне ли анонимизацията?</FONT></b></i></html>";
+        int num_opt = JOptionPane.showOptionDialog(f, msg, "Уместен въпрос", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        if (num_opt == JOptionPane.YES_OPTION) {
+            // try {
+            //     TimeUnit.SECONDS.sleep(1);
+            // } catch (InterruptedException ex) {
+            //     error_text = ex.getMessage().toString();
+            //     log.log(Level.WARNING, "Error: " + error_text);
+            //     taText = "Възникна грешка: " + error_text + "";
+            //     setDataGeneralStatisticsTextArea(taText);
+            //     taText = "------------------------------------------------------------------------------------------------------------------";
+            //     setDataGeneralStatisticsTextArea(taText);
+            // }
+            makeAnonymization();
+        } else if (num_opt == JOptionPane.NO_OPTION) {
+            taText = "Отказът Ви е одобрен!";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html>&nbsp;<b><FONT COLOR=GREEN>Отказът Ви е одобрен!</FONT></b></html>";
+            setStatusLabel(slText);
+            log.info("Отказът Ви е одобрен!");
+            msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            // clearStatusLabel();
+        } else {
+            taText = "Отказът Ви е одобрен!";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html>&nbsp;<b><FONT COLOR=GREEN>Отказът Ви е одобрен!</FONT></b></html>";
+            setStatusLabel(slText);
+            log.info("Отказът Ви е одобрен!");
+            msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            // clearStatusLabel();
+        }
+        // Анонимизация ------------------------------------------------------
+    }//GEN-LAST:event_mAnonymAdministrationsActionPerformed
+
+    private void mCheckDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mCheckDataActionPerformed
+        // Достъп до опция ---------------------------------------------------
+        String msg = null;
+        String error_text = null;
+        JPanel panel = new JPanel();
+        JLabel label = new JLabel("<html><i><b><FONT COLOR=BLUE>Въведете ПИН код:</FONT></b></i></html>");
+        JPasswordField pass = new JPasswordField(10) {
+            public void addNotify() {
+                super.addNotify();
+                requestFocus();
+            }
+        };
+        panel.add(label);
+        panel.add(pass);
+        String psd = "meu";
+        String pin = "";
+        Object[] options = {"Потвърждение", "Отказ"};
+        String title = "Разрешение за достъп";
+
+        try {
+            // int result = JOptionPane.showOptionDialog(f, panel, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            int result = JOptionPane.showOptionDialog(f, panel, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, pass);
+            if (result == 0) {  // OK
+                char[] password = pass.getPassword();
+                System.out.println("Your password is: " + new String(password));
+                pin = new String(password);
+                if (pin != null) {
+                    if (pin.isEmpty()) {
+                        // System.out.println("EMPTY!");
+                        taText = "Съжаляваме, Достъп отказан!";
+                        setDataGeneralStatisticsTextArea(taText);
+                        taText = "------------------------------------------------------------------------------------------------------------------";
+                        setDataGeneralStatisticsTextArea(taText);
+                        slText = "<html><FONT COLOR=RED><b>&nbsp;&nbsp;Съжаляваме, Достъп отказан!</b></FONT></html>";
+                        setStatusLabel(slText);
+                        msg = "<html><FONT COLOR=RED><b>Съжаляваме, Достъп отказан!</b></FONT></html>";
                         JOptionPane.showMessageDialog(f, msg);
-                        clearStatusLabel();
+                        return;
+                    } else if (pin.equalsIgnoreCase(psd)) {
+                        // System.out.println("Проверка за коректно анонимизирани данни!");
+                        taText = "Проверка за коректно анонимизирани данни!";
+                        setDataGeneralStatisticsTextArea(taText);
+                        taText = "------------------------------------------------------------------------------------------------------------------";
+                        setDataGeneralStatisticsTextArea(taText);
+                        slText = "<html>&nbsp;<b><FONT COLOR=GREEN>Проверка за коректно анонимизирани данни!</FONT></html>";
+                        setStatusLabel(slText);
+                        log.info("Проверка за коректно анонимизирани данни!");
+                        checkData();
                     } else {
-                        msg = "<html><i><b><FONT COLOR=BLUE>Отказът Ви е одобрен!</FONT></b></i></html>";
+                        // System.out.println("Not Equals");
+                        taText = "Съжаляваме, Достъп отказан!";
+                        setDataGeneralStatisticsTextArea(taText);
+                        taText = "------------------------------------------------------------------------------------------------------------------";
+                        setDataGeneralStatisticsTextArea(taText);
+                        slText = "<html><FONT COLOR=RED><b>&nbsp;&nbsp;Съжаляваме, Достъп отказан!</b></FONT></html>";
+                        setStatusLabel(slText);
+                        msg = "<html><FONT COLOR=RED><b>Съжаляваме, Достъп отказан!</b></FONT></html>";
                         JOptionPane.showMessageDialog(f, msg);
-                        clearStatusLabel();
+                        return;
                     }
+                } else {
+                    // System.out.println("CANCEL = NULL");
+                    taText = "Съжаляваме, Достъп отказан!";
+                    setDataGeneralStatisticsTextArea(taText);
+                    taText = "------------------------------------------------------------------------------------------------------------------";
+                    setDataGeneralStatisticsTextArea(taText);
+                    slText = "<html><FONT COLOR=RED><b>&nbsp;&nbsp;Съжаляваме, Достъп отказан!</b></FONT></html>";
+                    setStatusLabel(slText);
+                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, Достъп отказан!</b></FONT></html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                    return;
+                }
+            } else {  // CANCEL
+                // System.out.println("CANCEL = NULL");
+                taText = "Съжаляваме, Достъп отказан!";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html><FONT COLOR=RED><b>&nbsp;&nbsp;Съжаляваме, Достъп отказан!</b></FONT></html>";
+                setStatusLabel(slText);
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, Достъп отказан!</b></FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+                return;
+            }
+        } catch (Exception e) {
+            // System.out.println("Exception!");
+            error_text = e.getMessage().toString();
+            log.log(Level.WARNING, "Error: " + error_text);
+            taText = "Съжаляваме, възникна грешка: " + error_text + "";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            setStatusLabel(slText);
+            msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            return;
+        }
+        // Достъп до опция ---------------------------------------------------
+    }                                          
+
+    public void checkData() {
+        // Проверка в МЕУ | Избор: Файл с Данни ------------------------------
+        File selectedFile = null;
+        String nameFile = null;
+        String onlyNameFile = null;
+        JFileChooser fileChooser = null;
+        String msg = null;
+        String error_text = null;
+        char ch = ',';
+        int idx = 0;
+        String line = "";
+        String newLine = "\r\n";
+        String untranslitaratedBeneficiary = "";
+        String beneficiary = "";
+        String iban = "";
+        String reason1 = "";
+        String reason2 = "";
+        int isPerson = -1;
+
+        folder = this.getPathFolder();
+        if (folder.equals(null) || folder.equals("")) {
+            folder = System.getProperty("user.home").toString();
+        }
+        fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(folder));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("csv", "CSV"));
+        int result = fileChooser.showOpenDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            try {
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+                selectedFile = fileChooser.getSelectedFile();
+                inCheckData = selectedFile.getAbsolutePath();
+                nameFile = selectedFile.getName();
+                folder = selectedFile.getParent();
+                String[] res = nameFile.split("[.]", 0);
+                onlyNameFile = res[0];
+                outCheckData = folder + "\\" + "Check_" + onlyNameFile + ".csv";
+                pathInCheckData = Paths.get(inCheckData);
+                pathOutCheckData = Paths.get(outCheckData);
+                this.setInCheckData(inCheckData);
+                this.setOutCheckData(outCheckData);
+                this.setPathOutCheckData(pathOutCheckData);
+                this.setPathInCheckData(pathInCheckData);
+
+                if (!Files.exists(pathOutCheckData)) {
+                    Files.createFile(pathOutCheckData);
                 }
 
+                taText = " • Избран файл: " + inCheckData + "!";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html>&nbsp;&nbsp;<b><FONT COLOR=GREEN></FONT><FONT COLOR=RED>Избран файл:&nbsp;</FONT></b><FONT COLOR=BLUE>•&nbsp;" + onlyNameFile + "</FONT></html>";
+                setStatusLabel(slText);
+                log.info("Избран файл: " + inCheckData + "!");
+ 
+                try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(inCheckData)), "utf-8"); OutputStreamWriter writer = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outCheckData)), StandardCharsets.UTF_8)) {  // (new BufferedOutputStream(new FileOutputStream(outCsv)), StandardCharsets.UTF_8)  // (new BufferedOutputStream(new FileOutputStream(outCsv)), "UTF-8") // (new FileInputStream(inCsv)), "cp1251")
+                    CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT);
+                    try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+                        int anonymizedReasons = 0;
+                        int anonymizedReceivers = 0;
+
+                        for (CSVRecord record : parser) {
+                            try {
+                                beneficiary = record.get(1);  // CLIENT_RECEIVER_NAME
+                                iban = record.get(2);         // CLIENT_RECEIVER_ACC
+                                reason1 = record.get(8);      // REASON1
+                                reason2 = record.get(9);      // REASON2
+
+                                List<String> row = new ArrayList<>();
+                                for (int i = 0; i < record.size(); i++) {
+                                    row.add(record.get(i).trim());
+                                }
+
+                                isPerson = isBeneficiaryPerson(beneficiary);
+                                if (isPerson == 0) {
+                                    beneficiary = anonymizeReceivers(beneficiary);
+                                    iban = anonymizeReceiversIban(iban, beneficiary);
+                                    if (!beneficiary.equalsIgnoreCase(record.get(1))) {
+                                        anonymizedReceivers++;
+                                    }
+                                }
+                                reason1 = anonymizeReasonsAtCheck(reason1);
+                                reason2 = anonymizeReasonsAtCheck(reason2);
+
+                                if (!reason1.equalsIgnoreCase(record.get(8)) || !reason2.equalsIgnoreCase(record.get(9))) {
+                                    anonymizedReasons++;
+                                }
+
+                                row.set(1, beneficiary);
+                                row.set(2, iban);
+                                row.set(8, reason1);
+                                row.set(9, reason2);
+
+                                printer.printRecord(row);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+
+                        taText = " Проверката завърши успешно!";
+                        setDataGeneralStatisticsTextArea(taText);
+                        taText = " • Обработени основания за плащане: " + String.valueOf(anonymizedReasons);
+                        setDataGeneralStatisticsTextArea(taText);
+                        taText = " • Обработени получатели: " + String.valueOf(anonymizedReceivers);
+                        setDataGeneralStatisticsTextArea(taText);
+                        taText = "------------------------------------------------------------------------------------------------------------------";
+                        setDataGeneralStatisticsTextArea(taText);
+                        slText = "<html><FONT COLOR=GREEN><b>&nbsp;&nbsp;Проверката завърши успешно:</b></FONT><FONT COLOR=BLUE>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;Обработени записи:&nbsp;" + (anonymizedReasons + anonymizedReceivers) + "</FONT></html>";
+                        setStatusLabel(slText);
+                        msg = "<html><center><FONT COLOR=GREEN><b>Проверката завърши успешно!</b><br></FONT><FONT COLOR=BLUE>•&nbsp;Обработени основания за плащане:&nbsp;" + anonymizedReasons + "<br>•&nbsp;Обработени получатели:&nbsp;" + anonymizedReceivers + "</FONT></center></html>";
+                        JOptionPane.showMessageDialog(f, msg);
+                    }
+                } catch (FileNotFoundException ex) {
+                    error_text = ex.getMessage().toString();
+                    log.log(Level.WARNING, "Error: " + error_text);
+                    taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                    setDataGeneralStatisticsTextArea(taText);
+                    taText = "------------------------------------------------------------------------------------------------------------------";
+                    setDataGeneralStatisticsTextArea(taText);
+                    slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    setStatusLabel(slText);
+                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                    return;
+                } catch (UnsupportedEncodingException ex) {
+                    error_text = ex.getMessage().toString();
+                    log.log(Level.WARNING, "Error: " + error_text);
+                    taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                    setDataGeneralStatisticsTextArea(taText);
+                    taText = "------------------------------------------------------------------------------------------------------------------";
+                    setDataGeneralStatisticsTextArea(taText);
+                    slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    setStatusLabel(slText);
+                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                    return;
+                } catch (IOException ex) {
+                    error_text = ex.getMessage().toString();
+                    log.log(Level.WARNING, "Error: " + error_text);
+                    taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                    setDataGeneralStatisticsTextArea(taText);
+                    taText = "------------------------------------------------------------------------------------------------------------------";
+                    setDataGeneralStatisticsTextArea(taText);
+                    slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    setStatusLabel(slText);
+                    msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    JOptionPane.showMessageDialog(f, msg);
+                    return;
+                }
+            } catch (FileNotFoundException ex) {
                 this.setCursor(Cursor.getDefaultCursor());
-            } catch (Exception ex) {
-                Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
                 error_text = ex.getMessage().toString();
+                log.log(Level.WARNING, "Error: " + error_text);
+                taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                setStatusLabel(slText);
                 msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
                 JOptionPane.showMessageDialog(f, msg);
-                clearStatusLabel();
+            } catch (UnsupportedEncodingException ex) {
+                this.setCursor(Cursor.getDefaultCursor());
+                error_text = ex.getMessage().toString();
+                log.log(Level.WARNING, "Error: " + error_text);
+                taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                setStatusLabel(slText);
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+            } catch (IOException ex) {
+                System.out.println("1.3. | IOException: " + ex.getMessage() + " |");
+                error_text = ex.getMessage().toString();
+                log.log(Level.WARNING, "Error: " + error_text);
+                taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                setStatusLabel(slText);
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
+            } catch (Exception ex) {
+                this.setCursor(Cursor.getDefaultCursor());
+                error_text = ex.getMessage().toString();
+                log.log(Level.WARNING, "Error: " + error_text);
+                taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                setDataGeneralStatisticsTextArea(taText);
+                taText = "------------------------------------------------------------------------------------------------------------------";
+                setDataGeneralStatisticsTextArea(taText);
+                slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                setStatusLabel(slText);
+                msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                JOptionPane.showMessageDialog(f, msg);
             } finally {
                 try {
                     this.setCursor(Cursor.getDefaultCursor());
                 } catch (Exception ex) {
-                    Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
                     error_text = ex.getMessage().toString();
+                    log.log(Level.WARNING, "Error: " + error_text);
+                    taText = "Съжаляваме, възникна грешка: " + error_text + "";
+                    setDataGeneralStatisticsTextArea(taText);
+                    taText = "------------------------------------------------------------------------------------------------------------------";
+                    setDataGeneralStatisticsTextArea(taText);
+                    slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+                    setStatusLabel(slText);
                     msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
                     JOptionPane.showMessageDialog(f, msg);
-                    clearStatusLabel();
                 }
             }
         }
-    }//GEN-LAST:event_choiceSebraCodesFileActionPerformed
+        // Проверка в МЕУ | Избор: Файл с Данни ------------------------------
+    }//GEN-LAST:event_mCheckDataActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1068,19 +1214,56 @@ public class Sebra extends javax.swing.JFrame {
     }
 
     public void makeAnonymization() {
-        inCsv = getPathInCsv();  // Incoming file
-        salt = getSalt();  // Using to create Hash Code
-        orgCsv = getPathOrgCsv();  // File with administrative authorities
-        outCsv = getPathOutCsv();  // Outgoing file
         String msg = null;
+        String error_text = null;
         String untranslitaratedBeneficiary = "";
         String beneficiary = "";
         String iban = "";
         String reason1 = "";
         String reason2 = "";
 
+        folder = this.getPathFolder();
+        onlyNameFileData = this.getOnlyNameFileData();
+        onlyNameFileAdm = this.getOnlyNameFileAdm();
+        inAnonymData = this.getOutPreprocData();
+        inAnonymAdm = this.getOutPreprocAdm();
+        pathOutPreprocData = this.getPathOutPreprocData();
+        pathOutPreprocAdm = this.getPathOutPreprocAdm();
+        outAnonymData = folder + "\\" + "Anonymized_" + onlyNameFileData + ".csv";
+        this.setOutAnonymData(outAnonymData);
+        salt = getSalt();  // Using to create Hash Code
+
+        if (!Files.exists(pathOutPreprocData)) {
+            this.setCursor(Cursor.getDefaultCursor());
+            log.log(Level.WARNING, "Не е намерен обработения файл с Данни!");
+            taText = "Не е намерен обработения файл с Данни!";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html><FONT COLOR=RED><b>Не е намерен обработения файл с Данни!</b></FONT></html>";
+            setStatusLabel(slText);
+            msg = "<html><FONT COLOR=RED><b>Не е намерен обработения файл с Данни!</b></FONT></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            return;
+        }
+
+        if (!Files.exists(pathOutPreprocAdm)) {
+            this.setCursor(Cursor.getDefaultCursor());
+            log.log(Level.WARNING, "Не е намерен обработения файл с Администрации!");
+            taText = "Не е намерен обработения файл с Администрации!";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html><FONT COLOR=RED><b>Не е намерен обработения файл с Администрации!</b></FONT></html>";
+            setStatusLabel(slText);
+            msg = "<html><FONT COLOR=RED><b>Не е намерен обработения файл с Администрации!</b></FONT></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            return;
+        }
+
         Map<String, List<Organization>> organizations = new HashMap<>();  // CODE,NAME,DESCR,DATE_FROM,DATE_TO
-        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(orgCsv)), "utf-8")) {  // org.csv | (new FileInputStream(orgCsv)), "cp1251")
+        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(inAnonymAdm)), "utf-8")) {  // org.csv | (new FileInputStream(orgCsv)), "cp1251")
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader());
             for (CSVRecord record : parser) {
                 List<Organization> list = organizations.computeIfAbsent(record.get(0), (k) -> new ArrayList<>());  // // Add a new key-value pair only if the key does not exist in the HashMap, or is mapped to `null`.
@@ -1093,6 +1276,13 @@ public class Sebra extends javax.swing.JFrame {
                 } else {
                     org.setName(name);
                 }
+
+                // -----------------------------------------------------------------------------------------
+                // String sDateFrom = (LocalDate.parse(record.get(3).trim().split("\\s+")[0], DATE_FORMAT)).toString();
+                // String sDateTo = (LocalDate.parse(record.get(4), DATE_FORMAT)).toString();
+                // System.out.println("1.0. | name: " + name + " | description: " + description + " | sDateFrom: " + sDateFrom + " | sDateTo: " + sDateTo + " |");
+                // -----------------------------------------------------------------------------------------
+
                 org.setFrom(LocalDate.parse(record.get(3).trim().split("\\s+")[0], DATE_FORMAT).atStartOfDay().minusDays(1));
                 if (record.get(4).endsWith("3333")) {
                     org.setTo(LocalDateTime.now().plusWeeks(1));
@@ -1102,14 +1292,51 @@ public class Sebra extends javax.swing.JFrame {
                 list.add(org);
             }
         } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+            this.setCursor(Cursor.getDefaultCursor());
+            System.out.println("1.1. | UnsupportedEncodingException: " + ex.getMessage() + " |");
+            error_text = ex.getMessage().toString();
+            log.log(Level.WARNING, "Error: " + error_text);
+            taText = "Съжаляваме, възникна грешка: " + error_text + "";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            setStatusLabel(slText);
+            msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            return;
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+            this.setCursor(Cursor.getDefaultCursor());
+            System.out.println("1.2. | FileNotFoundException: " + ex.getMessage() + " |");
+            error_text = ex.getMessage().toString();
+            log.log(Level.WARNING, "Error: " + error_text);
+            taText = "Съжаляваме, възникна грешка: " + error_text + "";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            setStatusLabel(slText);
+            msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            return;
         } catch (IOException ex) {
-            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+            this.setCursor(Cursor.getDefaultCursor());
+            System.out.println("1.3. | IOException: " + ex.getMessage() + " |");
+            error_text = ex.getMessage().toString();
+            log.log(Level.WARNING, "Error: " + error_text);
+            taText = "Съжаляваме, възникна грешка: " + error_text + "";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            setStatusLabel(slText);
+            msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            return;
         }
 
-        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(inCsv)), "utf-8"); OutputStreamWriter writer = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outCsv)), StandardCharsets.UTF_8)) {  // (new BufferedOutputStream(new FileOutputStream(outCsv)), StandardCharsets.UTF_8)  // (new BufferedOutputStream(new FileOutputStream(outCsv)), "UTF-8") // (new FileInputStream(inCsv)), "cp1251")
+        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(inAnonymData)), "utf-8"); OutputStreamWriter writer = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outAnonymData)), StandardCharsets.UTF_8)) {  // (new BufferedOutputStream(new FileOutputStream(outCsv)), StandardCharsets.UTF_8)  // (new BufferedOutputStream(new FileOutputStream(outCsv)), "UTF-8") // (new FileInputStream(inCsv)), "cp1251")
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT);
             try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
                 int anonymizedReasons = 0;
@@ -1119,7 +1346,7 @@ public class Sebra extends javax.swing.JFrame {
 
                 for (CSVRecord record : parser) {
                     try {
-                        iban = record.get(2);  // CLIENT_RECEIVER_ACC
+                        iban = record.get(2);     // CLIENT_RECEIVER_ACC
                         reason1 = record.get(8);  // REASON1
                         reason2 = record.get(9);  // REASON2
 
@@ -1139,17 +1366,17 @@ public class Sebra extends javax.swing.JFrame {
                         reason1 = anonymizeReasons(reason1);
                         reason2 = anonymizeReasons(reason2);
 
-                        row.set(1, beneficiary);
-                        row.set(2, iban);
-                        row.set(8, reason1);
-                        row.set(9, reason2);
-
-                        if (!beneficiary.equalsIgnoreCase(record.get(1))) {
+                        if (!beneficiary.equalsIgnoreCase(untranslitaratedBeneficiary)) {
                             anonymizedReceivers++;
                         }
                         if (!reason1.equalsIgnoreCase(record.get(8)) || !reason2.equalsIgnoreCase(record.get(9))) {
                             anonymizedReasons++;
                         }
+
+                        row.set(1, beneficiary);
+                        row.set(2, iban);
+                        row.set(8, reason1);
+                        row.set(9, reason2);
 
                         if (header) {
                             row.add("ORGANIZATION");
@@ -1206,6 +1433,7 @@ public class Sebra extends javax.swing.JFrame {
                     }
                 }
 
+                this.setCursor(Cursor.getDefaultCursor());
                 taText = " Анонимизирането завърши успешно!";
                 setDataGeneralStatisticsTextArea(taText);
                 taText = " • Анонимизирани основания за плащане: " + String.valueOf(anonymizedReasons);
@@ -1216,39 +1444,50 @@ public class Sebra extends javax.swing.JFrame {
                 setDataGeneralStatisticsTextArea(taText);
                 taText = "------------------------------------------------------------------------------------------------------------------";
                 setDataGeneralStatisticsTextArea(taText);
-                taText = " • Проверка за коректна анонимизация.";
-                setDataGeneralStatisticsTextArea(taText);
-                taText = "   В анинимизирания файл не трябва да има:";
-                setDataGeneralStatisticsTextArea(taText);
-                taText = "   - Адреси:";
-                setDataGeneralStatisticsTextArea(taText);
-                taText = "       ⯈ Търсим в получения файл: 'бул.', 'ул.', 'бл.' и проверяваме дали в анонимизирания файл полето е заместено с: 'Адрес'.";
-                setDataGeneralStatisticsTextArea(taText);
-                taText = "   - ЕГН:";
-                setDataGeneralStatisticsTextArea(taText);
-                taText = "       ⯈ Търсим в анонимизирания файл абревиатура 'ЕГН' и проверяваме дали след нея стои хеш кода на криптираната стойност на ЕГН-то, по абсолютна стойност, а в получения файл проверяваме за наличие на абревиатура 'ЕГН' и десетцифреното ЕГН, или за наличие само на десетцифрено ЕГН.";
-                setDataGeneralStatisticsTextArea(taText);
-                taText = "   - Имена на Физически лица:";
-                setDataGeneralStatisticsTextArea(taText);
-                taText = "       ⯈ Търсим в анонимизирания файл израза 'Физическо лице' и проверяваме дали в получения файл действително стоят имената на физическо лице или са други думи, разпознати като имена на хора.";
-                setDataGeneralStatisticsTextArea(taText);
-                taText = "   - IBAN на бенефициент ФЛ:";
-                setDataGeneralStatisticsTextArea(taText);
-                taText = "       ⯈ Търсим в анонимизирания файл израза 'Физическо лице' за поле: 'CLIENT_RECEIVER_NAME' и проверяваме дали за тези записи поле: 'CLIENT_RECEIVER_ACC' = 'абсолютната стойност на хеш кода на криптираната стойност (RSA public-key) на IBAN-a на Физическото лице'.";
-                setDataGeneralStatisticsTextArea(taText);
-                taText = "------------------------------------------------------------------------------------------------------------------";
-                setDataGeneralStatisticsTextArea(taText);
-                slText = "<html><FONT COLOR=GREEN><b>&nbsp;&nbsp;Анонимизирането завърши успешно:</b></FONT><FONT COLOR=BLUE>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;Анонимизирани записи:&nbsp;" + (anonymizedReasons + anonymizedReceivers) + "</FONT></FONT><FONT COLOR=RED>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;Класифицирани записи:&nbsp;" + anonymizedClassified + "</FONT></html>";
+                slText = "<html><FONT COLOR=GREEN><b>&nbsp;&nbsp;Анонимизирането завърши успешно:</b></FONT><FONT COLOR=BLUE>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;Анонимизирани записи:&nbsp;" + (anonymizedReasons + anonymizedReceivers) + "</FONT><FONT COLOR=RED>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;Класифицирани записи:&nbsp;" + anonymizedClassified + "</FONT></html>";
                 setStatusLabel(slText);
-                msg = "<html><center><FONT COLOR=GREEN><b>Анонимизирането завърши успешно!</b><br></FONT><FONT COLOR=BLUE>•&nbsp;Анонимизирани основания за плащане:&nbsp;" + anonymizedReasons + "<br>•&nbsp;Анонимизирани получатели:&nbsp;" + anonymizedReceivers + "</FONT><br></FONT><FONT COLOR=RED>•&nbsp;Класифицирани записи:&nbsp;" + anonymizedClassified + "</FONT></center></html>";
+                msg = "<html><center><FONT COLOR=GREEN><b>Анонимизирането завърши успешно!</b><br></FONT><FONT COLOR=BLUE>•&nbsp;Анонимизирани основания за плащане:&nbsp;" + anonymizedReasons + "<br>•&nbsp;Анонимизирани получатели:&nbsp;" + anonymizedReceivers + "</FONT><br><FONT COLOR=RED>•&nbsp;Класифицирани записи:&nbsp;" + anonymizedClassified + "</FONT></center></html>";
                 JOptionPane.showMessageDialog(f, msg);
             }
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+            this.setCursor(Cursor.getDefaultCursor());
+            error_text = ex.getMessage().toString();
+            log.log(Level.WARNING, "Error: " + error_text);
+            taText = "Съжаляваме, възникна грешка: " + error_text + "";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            setStatusLabel(slText);
+            msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            return;
         } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+            this.setCursor(Cursor.getDefaultCursor());
+            error_text = ex.getMessage().toString();
+            log.log(Level.WARNING, "Error: " + error_text);
+            taText = "Съжаляваме, възникна грешка: " + error_text + "";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            setStatusLabel(slText);
+            msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            return;
         } catch (IOException ex) {
-            Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
+            this.setCursor(Cursor.getDefaultCursor());
+            error_text = ex.getMessage().toString();
+            log.log(Level.WARNING, "Error: " + error_text);
+            taText = "Съжаляваме, възникна грешка: " + error_text + "";
+            setDataGeneralStatisticsTextArea(taText);
+            taText = "------------------------------------------------------------------------------------------------------------------";
+            setDataGeneralStatisticsTextArea(taText);
+            slText = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            setStatusLabel(slText);
+            msg = "<html><FONT COLOR=RED><b>Съжаляваме, възникна грешка:&nbsp;</b></FONT><FONT COLOR=BLUE>" + error_text + "</FONT></html>";
+            JOptionPane.showMessageDialog(f, msg);
+            return;
         }
     }
 
@@ -1464,6 +1703,241 @@ public class Sebra extends javax.swing.JFrame {
                                         isTextEgn = checkIsTextEgn(part);
                                         if (isTextEgn == true) {  // Word is Egn!
                                             result += "";
+                                            System.out.println("7.6. isPartOnlyString: " + isPartOnlyString + " | isTextEgn: " + isTextEgn + " | part: " + part + " | result: " + result + "");
+                                        } else {
+                                            isPartPersonalName = checkIsPartPersonalName(part);
+                                            if (isPartPersonalName == true) {  // Words is PersonalName
+                                                if (isExpressionPersonalName == true) {
+                                                    isPersonalName = isPartPersonalName;
+                                                    countPersonalName++;
+                                                    partsPersonalName += part + " ";
+                                                    System.out.println("8.1. isPartOnlyString: " + isPartOnlyString + " | isPartPersonalName: " + isPartPersonalName + " | partsPersonalName: " + partsPersonalName + " | part: " + part + " | result: " + result + "");
+                                                }
+                                            } else {  // Words isn't PersonalName
+                                                if (isPersonalName == true && (countPersonalName >= 2 && countPersonalName < 4)) {  // If the previous words are PersonalName
+                                                    isPersonalName = false;
+                                                    result += "Физическо лице" + " ";
+                                                    System.out.println("8.2. isPartOnlyString: " + isPartOnlyString + " | isPersonalName: " + isPersonalName + " | partsPersonalName: " + partsPersonalName + " | part: " + part + " | result: " + result + "");
+                                                    partsPersonalName = "";
+                                                } else {  // If the previous words aren't PersonalName
+                                                    result += part + " ";
+                                                    System.out.println("8.3. isPartOnlyString: " + isPartOnlyString + " | isTextEgn: " + isTextEgn + " | part: " + part + " | result: " + result + "");
+                                                }  // Was there a PersonalName in the previous words?
+                                            }  // Is PersonalName?
+                                        }  // Is Egn?
+                                    }  // Is there a combined string and digits
+                                }  // Is contains word Bulstat?
+                            }  // Is Only Digits?
+                        }  // Is previous words are PersonalName?
+                    }  // Is word Only String?
+                }  // Is expression contains non personal indicators?
+            }  // Is contain an Address?
+        }  // for
+
+        lengthPartsPersonalName = partsPersonalName.length();
+        lengthResult = result.length();
+        if (lengthPartsPersonalName > 0) {
+            if (lengthResult > 0) {
+                if (countPersonalName >= 2) {
+                    result = "Физическо лице" + " ";
+                    System.out.println("9.1. lengthPartsPersonalName: " + lengthPartsPersonalName + " | lengthResult: " + lengthResult + " | result: " + result + "");
+                } else {
+                    result += partsPersonalName.trim() + " ";
+                    System.out.println("9.2. lengthPartsPersonalName: " + lengthPartsPersonalName + " | lengthResult: " + lengthResult + " | result: " + result + "");
+                }
+            } else {
+                if (countPersonalName >= 2) {
+                    result = "Физическо лице" + " ";
+                    System.out.println("9.3. lengthPartsPersonalName: " + lengthPartsPersonalName + " | lengthResult: " + lengthResult + " | result: " + result + "");
+                } else {
+                    result += partsPersonalName.trim() + " ";
+                    System.out.println("9.4. lengthPartsPersonalName: " + lengthPartsPersonalName + " | lengthResult: " + lengthResult + " | result: " + result + "");
+                }
+            }
+            partsPersonalName = "";
+        }
+
+        result = result.trim().toUpperCase();
+        System.out.println("10. result: " + result + "");
+        return result;
+    }
+
+    private String anonymizeReasonsAtCheck(String reason) {
+        String result = "";
+        String[] parts = {};
+        String lowerCaseString = reason.toLowerCase().trim();
+        String msg = null;
+        parts = lowerCaseString.split("\\s+");
+        Boolean isHasAddress = false;
+        Boolean isHasBulstat = false;
+        Boolean isHasEgn = false;
+        Boolean isExpressionPersonalName = false;
+        Boolean isPartOnlyString = false;
+        Boolean isPartOnlyDigits = false;
+        Boolean isPartPersonalName = false;
+        Boolean isPartValidEgn = false;
+        Boolean isPartCombineEgn = false;
+        Boolean isPartCombineBulstat = false;
+        Boolean isPartCombineStringDigits = false;
+        Boolean isTextBulstat = false;
+        Boolean isPersonalName = false;
+        Boolean isTextEgn = false;
+        Boolean isExpressionNonPersonalIndicators = false;
+        String partsPersonalName = "";
+        int countPersonalName = 0;
+        int countPartOnlyDigits = 0;
+        int countPartStringDigits = 0;
+        int lengthPartsPersonalName = 0;
+        int lengthResult = 0;
+        String encryptEgn = "";
+        String hashEncryptEgn = "";
+        String resultPart = "";
+
+        isHasAddress = checkIsHasAddress(lowerCaseString);
+        isHasBulstat = checkIsHasBulstat(lowerCaseString);
+        isHasEgn = checkIsHasEgn(lowerCaseString);
+        isExpressionPersonalName = checkIsExpressionPersonalName(lowerCaseString);
+        isExpressionNonPersonalIndicators = checkIsExpressionNonPersonalIndicators(lowerCaseString);
+
+        System.out.println("1. isHasAddress: " + isHasAddress + " | Expression: " + lowerCaseString + "");
+        System.out.println("1. isHasBulstat: " + isHasBulstat + " | Expression: " + lowerCaseString + "");
+        System.out.println("1. isHasEgn: " + isHasEgn + " | Expression: " + lowerCaseString + "");
+        System.out.println("1. isExpressionPersonalName: " + isExpressionPersonalName + " | Expression: " + lowerCaseString + "");
+        System.out.println("1. isExpressionNonPersonalIndicators: " + isExpressionNonPersonalIndicators + " | Expression: " + lowerCaseString + "");
+
+        for (String part : parts) {
+            if (isHasAddress == true) {  // The expression contain an Address - Replace with 'Адрес'!
+                result = "Адрес";
+                System.out.println("2. isHasAddress: " + isHasAddress + " | " + part + "");
+            } else {  // The expression does NOT contain an Address!
+                if (isExpressionNonPersonalIndicators == true) {  // Expression contains non personal indicators, i.e. the parts recognized as personal names should be recorded!
+                    isPartOnlyDigits = checkIsPartOnlyDigits(part);
+                    if (isPartOnlyDigits == true) {  // Word is Only Digits
+                        if (isHasEgn == true && isHasBulstat == false) {  // If the expression contains word EGN AND does not contain word Bulstat!
+                            isPartValidEgn = checkIsPartValidEgn(part);
+                            if (isPartValidEgn == true) {  // Word is valid EGN!
+                                result += part + " ";
+                                System.out.println("3.1. isPartOnlyDigits: " + isPartOnlyDigits + " | isPartValidEgn: " + isPartValidEgn + " | part: " + part + " | result: " + result + "");
+                            } else {  // Word isn't valid EGN!
+                                result += part + " ";
+                                System.out.println("3.3. isPartOnlyDigits: " + isPartOnlyDigits + " | ELSE (part.length() == 10) " + " | part: " + part + " | result: " + result + "");
+                            }  // Is valid EGN?
+                        } else {  // Word isn't valid EGN! Is the word is Bulstat - not change it!
+                            result += part + " ";
+                            System.out.println("3.4. isPartOnlyDigits: " + isPartOnlyDigits + " | ELSE isHasEgn " + " | part: " + part + " | result: " + result + "");
+                        }  // Contains the EGN/Bulstat?
+                    } else {  // Word does NOT Only Digits
+                        if (isHasBulstat == true) {  // If the expression contains word Bulstat!
+                            isTextBulstat = checkIsTextBulstat(part);
+                            if (isTextBulstat == true) {  // Word is Bulstat!
+                                result += part + " ";
+                                System.out.println("4.1. isPartOnlyDigits: " + isPartOnlyDigits + " | isTextBulstat " + isTextBulstat + " | part: " + part + " | result: " + result + "");
+                            } else {  // Word isn't Bulstat!
+                                result += part + " ";
+                                System.out.println("4.2. isPartOnlyDigits: " + isPartOnlyDigits + " | isTextBulstat " + isTextBulstat + " | part: " + part + " | result: " + result + "");
+                            }  // Is word Bulstat?
+                        } else {  // If the expression doesn't contains word Bulstat!
+                            isPartCombineEgn = checkIsPartCombineEgn(part);
+                            if (isPartCombineEgn == true) {  // The word is a combination of EGN as 'ЕГН0123456789'!
+                                result += part + " ";
+                                System.out.println("4.3. isPartOnlyDigits: " + isPartOnlyDigits + " | isPartCombineEgn " + isPartCombineEgn + " | part: " + part + " | result: " + result + "");
+                            } else {  // The word isn't combination of EGN!
+                                isTextEgn = checkIsTextEgn(part);
+                                if (isTextEgn == true) {  // Word is Egn!
+                                    result += part + " ";
+                                    System.out.println("4.4. isPartOnlyString: " + isPartOnlyString + " | isTextEgn: " + isTextEgn + " | part: " + part + " | result: " + result + "");
+                                } else {
+                                    result += part + " ";
+                                    System.out.println("4.5. isPartOnlyString: " + isPartOnlyString + " | isTextEgn: " + isTextEgn + " | part: " + part + " | result: " + result + "");
+                                }  // Is Egn?
+                            }  // Is word  a combination of EGN?
+                        }  // Is contains word Bulstat?
+                    }  // Is Only Digits?
+                } else {  // Expression isn't contains non personal indicators!
+                    isPartOnlyString = checkIsPartOnlyString(part);
+                    if (isPartOnlyString == true) {  // Word Only String
+                        isPartPersonalName = checkIsPartPersonalName(part);
+                        if (isPartPersonalName == true) {  // Words is PersonalName
+                            if (isExpressionPersonalName == true) {
+                                isPersonalName = isPartPersonalName;
+                                countPersonalName++;
+                                partsPersonalName += part + " ";
+                                System.out.println("5.1. isPartOnlyString: " + isPartOnlyString + " | isPartPersonalName: " + isPartPersonalName + " | partsPersonalName: " + partsPersonalName + " | part: " + part + " | result: " + result + "");
+                            }
+                        } else {  // Words isn't PersonalName
+                            if (isPersonalName == true && (countPersonalName >= 2 && countPersonalName < 4)) {  // If the previous words are PersonalName
+                                isPersonalName = false;
+                                result += "Физическо лице" + " ";
+                                System.out.println("5.2. isPartOnlyString: " + isPartOnlyString + " | isPersonalName: " + isPersonalName + " | partsPersonalName: " + partsPersonalName + " | part: " + part + " | result: " + result + "");
+                                partsPersonalName = "";
+                            } else {
+                                isTextEgn = checkIsTextEgn(part);
+                                if (isTextEgn == true) {  // Word is Egn!
+                                    result += part + " ";
+                                    System.out.println("5.3. isPartOnlyString: " + isPartOnlyString + " | isTextEgn: " + isTextEgn + " | partsPersonalName: " + partsPersonalName + " | part: " + part + " | result: " + result + "");
+                                } else {
+                                    result += part + " ";
+                                    System.out.println("5.4. isPartOnlyString: " + isPartOnlyString + " | isTextEgn: " + isTextEgn + " | partsPersonalName: " + partsPersonalName + " | part: " + part + " | result: " + result + "");
+                                }  // Is Egn?
+                                partsPersonalName = "";
+                            }
+                        }  // Is PersonalName?
+                    } else {  // Word Not Only String
+                        if (isPersonalName == true && (countPersonalName >= 2 && countPersonalName < 4)) {  // If the previous words are PersonalName
+                            isPersonalName = false;
+                            result += "Физическо лице" + " ";
+                            partsPersonalName = "";
+                            System.out.println("6.1. isPartOnlyString: " + isPartOnlyString + " | isPersonalName: " + isPersonalName + " | part: " + part + " | result: " + result + "");
+                        } else {  // If the previous words aren't PersonalName
+                            isPartOnlyDigits = checkIsPartOnlyDigits(part);
+                            if (isPartOnlyDigits == true) {  // Word is Only Digits
+                                if (isHasEgn == true && isHasBulstat == false) {  // If the expression contains word EGN AND does not contain word Bulstat!
+                                    isPartValidEgn = checkIsPartValidEgn(part);
+                                    if (isPartValidEgn == true) {  // Word is valid EGN!
+                                        result += part + " ";
+                                        System.out.println("6.2. isPartOnlyDigits: " + isPartOnlyDigits + " | isPartValidEgn: " + isPartValidEgn + " | part: " + part + " | result: " + result + "");
+                                    } else {  // Word isn't valid EGN!
+                                        result += part + " ";
+                                        System.out.println("6.4. isPartOnlyDigits: " + isPartOnlyDigits + " | ELSE (part.length() == 10) " + " | part: " + part + " | result: " + result + "");
+                                    }  // Is valid EGN?
+                                } else {  // Word isn't valid EGN! Is the word is Bulstat - not change it!
+                                    isPartValidEgn = checkIsPartValidEgn(part);
+                                    if (isPartValidEgn == true) {  // Word is valid EGN!
+                                        result += part + " ";
+                                        System.out.println("6.5. isPartOnlyDigits: " + isPartOnlyDigits + " | isPartValidEgn: " + isPartValidEgn + " | part: " + part + " | result: " + result + "");
+                                    } else {  // Word isn't valid EGN!
+                                        result += part + " ";
+                                        countPartOnlyDigits++;
+                                        System.out.println("6.6. isPartOnlyDigits: " + isPartOnlyDigits + " | ELSE (part.length() == 10) " + " | part: " + part + " | result: " + result + "");
+                                    }  // Is valid EGN?
+                                }  // Contains the EGN/Bulstat?
+                            } else {  // Word does NOT Only Digits
+                                if (isHasBulstat == true) {  // If the expression contains word Bulstat!
+                                    isTextBulstat = checkIsTextBulstat(part);
+                                    if (isTextBulstat == true) {  // Word is Bulstat!
+                                        result += part + " ";
+                                        System.out.println("7.1. isPartOnlyDigits: " + isPartOnlyDigits + " | isTextBulstat: " + isTextBulstat + " | part: " + part + " | result: " + result + "");
+                                    } else {  // Word isn't Bulstat!
+                                        result += part + " ";
+                                        System.out.println("7.2. isPartOnlyDigits: " + isPartOnlyDigits + " | isTextBulstat: " + isTextBulstat + " | part: " + part + " | result: " + result + "");
+                                    }  // Is word Bulstat?
+                                } else {  // If the expression doesn't contains word Bulstat!
+                                    isPartCombineStringDigits = checkIsPartCombineStringDigits(part);
+                                    if (isPartCombineStringDigits == true) {  // The word has combine string and digits
+                                        countPartStringDigits++;
+                                        isPartCombineEgn = checkIsPartCombineEgn(part);
+                                        if (isPartCombineEgn == true) {  // The word is a combination of EGN as 'ЕГН0123456789'!
+                                            result += part + " ";
+                                            System.out.println("7.3. isPartOnlyDigits: " + isPartOnlyDigits + " | isPartCombineEgn " + isPartCombineEgn + " | part: " + part + " | result: " + result + "");
+                                        } else {  // The word hasn't combine string and digits
+                                            result += part + " ";
+                                            System.out.println("7.4. isPartOnlyString: " + isPartOnlyString + " | isTextEgn: " + isTextEgn + " | part: " + part + " | result: " + result + "");
+                                        }  // Is word a combination of EGN?
+                                        System.out.println("7.5. isPartCombineStringDigits: " + isPartCombineStringDigits + " | countPartStringDigits: " + countPartStringDigits + " | part: " + part + " | result: " + result + "");
+                                    } else {  // The word hasn't combine string and digits
+                                        isTextEgn = checkIsTextEgn(part);
+                                        if (isTextEgn == true) {  // Word is Egn!
+                                            result += part + " ";
                                             System.out.println("7.6. isPartOnlyString: " + isPartOnlyString + " | isTextEgn: " + isTextEgn + " | part: " + part + " | result: " + result + "");
                                         } else {
                                             isPartPersonalName = checkIsPartPersonalName(part);
@@ -1899,6 +2373,28 @@ public class Sebra extends javax.swing.JFrame {
         return result;
     }
 
+    public int isBeneficiaryPerson(String beneficiary) {
+        int isPerson = -1;
+
+        if ((beneficiary.matches("\\bФИЗИЧЕСКО ЛИЦЕ\\b"))
+                || (beneficiary.matches("\\bФИЗИЧЕСКО ЛИЦЕ\\b.+"))
+                || (beneficiary.matches("\\bФИЗИЧЕСКО ЛИЦЕ\\s\\b.+"))
+                || (beneficiary.matches(".+\\bФИЗИЧЕСКО ЛИЦЕ\\b"))
+                || (beneficiary.matches(".+\\bФИЗИЧЕСКО ЛИЦЕ\\b.+"))
+                || (beneficiary.matches(".+\\bФИЗИЧЕСКО ЛИЦЕ\\s\\b.+"))
+                || (beneficiary.matches("ФИЗИЧЕСКО ЛИЦЕ\\b"))
+                || (beneficiary.matches("ФИЗИЧЕСКО ЛИЦЕ\\b.+"))
+                || (beneficiary.matches("ФИЗИЧЕСКО ЛИЦЕ\\s\\b.+"))
+                || (beneficiary.matches("ФИЗИЧЕСКО ЛИЦЕ\\s"))
+                || (beneficiary.matches("ФИЗИЧЕСКО ЛИЦЕ"))) {
+            isPerson = 1;
+        } else {
+            isPerson = 0;
+        }
+
+        return isPerson;
+    }
+
     private static String untransliterate(String reason) {
         String result = TRANSLITERATOR.transliterate(reason);
         return result;
@@ -1916,36 +2412,141 @@ public class Sebra extends javax.swing.JFrame {
         return hexString.toString();
     }
 
-    public String getPathInCsv() {
-        return inCsv;
+    // /////////////////////////////////////////////////////////////////////
+    public String getInPreprocData() {
+        return inPreprocData;
     }
 
-    public void setPathInCsv(String inCsv) {
-        this.inCsv = inCsv;
+    public void setInPreprocData(String inPreprocData) {
+        this.inPreprocData = inPreprocData;
     }
 
-    public String getPathOrgCsv() {
-        return orgCsv;
+    public String getOutPreprocData() {
+        return outPreprocData;
     }
 
-    public void setPathOrgCsv(String orgCsv) {
-        this.orgCsv = orgCsv;
+    public void setOutPreprocData(String outPreprocData) {
+        this.outPreprocData = outPreprocData;
     }
 
-    public String getPathSaltTxt() {
-        return saltTxt;
+    public Path getPathInPreprocData() {
+        return pathInPreprocData;
     }
 
-    public void setPathSaltTxt(String saltTxt) {
-        this.saltTxt = saltTxt;
+    public void setPathInPreprocData(Path pathInPreprocData) {
+        this.pathInPreprocData = pathInPreprocData;
     }
 
-    public String getPathOutCsv() {
-        return outCsv;
+    public Path getPathOutPreprocData() {
+        return pathOutPreprocData;
     }
 
-    public void setPathOutCsv(String outCsv) {
-        this.outCsv = outCsv;
+    public void setPathOutPreprocData(Path pathOutPreprocData) {
+        this.pathOutPreprocData = pathOutPreprocData;
+    }
+
+    public String getInPreprocAdm() {
+        return inPreprocAdm;
+    }
+
+    public void setInPreprocAdm(String inPreprocAdm) {
+        this.inPreprocAdm = inPreprocAdm;
+    }
+
+    public String getOutPreprocAdm() {
+        return outPreprocAdm;
+    }
+
+    public void setOutPreprocAdm(String outPreprocAdm) {
+        this.outPreprocAdm = outPreprocAdm;
+    }
+
+    public Path getPathInPreprocAdm() {
+        return pathInPreprocAdm;
+    }
+
+    public void setPathInPreprocAdm(Path pathInPreprocAdm) {
+        this.pathInPreprocAdm = pathInPreprocAdm;
+    }
+
+    public Path getPathOutPreprocAdm() {
+        return pathOutPreprocAdm;
+    }
+
+    public void setPathOutPreprocAdm(Path pathOutPreprocAdm) {
+        this.pathOutPreprocAdm = pathOutPreprocAdm;
+    }
+
+    public String getInAnonymData() {
+        return inAnonymData;
+    }
+
+    public void setInAnonymData(String inAnonymData) {
+        this.inAnonymData = inAnonymData;
+    }
+
+    public String getOutAnonymData() {
+        return outAnonymData;
+    }
+
+    public void setOutAnonymData(String outAnonymData) {
+        this.outAnonymData = outAnonymData;
+    }
+
+    public Path getPathInAnonymData() {
+        return pathInAnonymData;
+    }
+
+    public void setPathInAnonymData(Path pathInAnonymData) {
+        this.pathInAnonymData = pathInAnonymData;
+    }
+
+    public Path getPathOutAnonymData() {
+        return pathOutAnonymData;
+    }
+
+    public void setPathOutAnonymData(Path pathOutAnonymData) {
+        this.pathOutAnonymData = pathOutAnonymData;
+    }
+
+    public String getInAnonymAdm() {
+        return inAnonymAdm;
+    }
+
+    public void setInAnonymAdm(String inAnonymAdm) {
+        this.inAnonymAdm = inAnonymAdm;
+    }
+
+    public String getInCheckData() {
+        return inCheckData;
+    }
+
+    public void setInCheckData(String inCheckData) {
+        this.inCheckData = inCheckData;
+    }
+
+    public String getOutCheckData() {
+        return outCheckData;
+    }
+
+    public void setOutCheckData(String outCheckData) {
+        this.outCheckData = outCheckData;
+    }
+
+    public Path getPathInCheckData() {
+        return pathInCheckData;
+    }
+
+    public void setPathInCheckData(Path pathInCheckData) {
+        this.pathInCheckData = pathInCheckData;
+    }
+
+    public Path getPathOutCheckData() {
+        return pathOutCheckData;
+    }
+
+    public void setPathOutCheckData(Path pathOutCheckData) {
+        this.pathOutCheckData = pathOutCheckData;
     }
 
     public String getPathFolder() {
@@ -1964,79 +2565,24 @@ public class Sebra extends javax.swing.JFrame {
         this.salt = salt;
     }
 
-    // ////////////////////////////////////////
-    public String getPathInDelRegNumCsv() {
-        return inDelRegNumCsv;
+    public String getOnlyNameFileData() {
+        return onlyNameFileData;
     }
 
-    public void setPathInDelRegNumCsv(String inDelRegNumCsv) {
-        this.inDelRegNumCsv = inDelRegNumCsv;
+    public void setOnlyNameFileData(String onlyNameFileData) {
+        this.onlyNameFileData = onlyNameFileData;
     }
 
-    public String getPathOutDelRegNumCsv() {
-        return outDelRegNumCsv;
+    public String getOnlyNameFileAdm() {
+        return onlyNameFileAdm;
     }
 
-    public void setPathOutDelRegNumCsv(String outDelRegNumCsv) {
-        this.outDelRegNumCsv = outDelRegNumCsv;
+    public void setOnlyNameFileAdm(String onlyNameFileAdm) {
+        this.onlyNameFileAdm = onlyNameFileAdm;
     }
+    // /////////////////////////////////////////////////////////////////////
 
-    public String getPathRegNumCsv() {
-        return regNumCsv;
-    }
-
-    public void setPathRegNumCsv(String regNumCsv) {
-        this.regNumCsv = regNumCsv;
-    }
-
-    public String getPathRejectedDelRegNumCsv() {
-        return rejectedDelRegNumCsv;
-    }
-
-    public void setPathRejectedDelRegNumCsv(String rejectedDelRegNumCsv) {
-        this.rejectedDelRegNumCsv = rejectedDelRegNumCsv;
-    }
-
-    public String getPathAutodelRegNumCsv() {
-        return autodelRegNumCsv;
-    }
-
-    public void setPathAutodelRegNumCsv(String autodelRegNumCsv) {
-        this.autodelRegNumCsv = autodelRegNumCsv;
-    }
-
-    public String getPathInDelSebraCodesCsv() {
-        return inDelSebraCodesCsv;
-    }
-
-    public void setPathInDelSebraCodesCsv(String inDelSebraCodesCsv) {
-        this.inDelSebraCodesCsv = inDelSebraCodesCsv;
-    }
-
-    public String getPathOutDelSebraCodesCsv() {
-        return outDelSebraCodesCsv;
-    }
-
-    public void setPathOutDelSebraCodesCsv(String outDelSebraCodesCsv) {
-        this.outDelSebraCodesCsv = outDelSebraCodesCsv;
-    }
-
-    public String getPathSebraCodesCsv() {
-        return sebraCodesCsv;
-    }
-
-    public void setPathSebraCodesCsv(String sebraCodesCsv) {
-        this.sebraCodesCsv = sebraCodesCsv;
-    }
-
-    public String getPathAutodelSebraCodesCsv() {
-        return autodelDelSebraCodesCsv;
-    }
-
-    public void setPathAutodelSebraCodesCsv(String autodelDelSebraCodesCsv) {
-        this.autodelDelSebraCodesCsv = autodelDelSebraCodesCsv;
-    }
-
+    /*
     public void makeDeletionByRegistrationNumber() {
         inDelRegNumCsv = getPathInDelRegNumCsv();  // Файл за изтриване по номер на регистрация! | File to delete by registration number!
         regNumCsv = getPathRegNumCsv();  // Файл-масив с номера на регистрация и себра кодове! | File-array with registration numbers and sebra codes!
@@ -2323,7 +2869,7 @@ public class Sebra extends javax.swing.JFrame {
     public class SebraCodes {
         public String sebraCode;
     }
-    // //////////////////////////
+    */
 
     public static class Organization {
         private String code;
@@ -2982,6 +3528,7 @@ public class Sebra extends javax.swing.JFrame {
             // decryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
             // byte[] decryptedIbanBytes = decryptCipher.doFinal(encryptedMessageBytes);
             // decryptedIban = new String(decryptedIbanBytes, StandardCharsets.UTF_8);  // This is the decryption string
+
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(Sebra.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchPaddingException ex) {
@@ -3033,23 +3580,28 @@ public class Sebra extends javax.swing.JFrame {
     public void clearStatusLabel() {
         statusLabel.setText("");
     }
+    
+    public Date getCurrentDate() {
+        return currentDate;
+    }
+
+    public void setCurrentDate(Date currentDate) {
+        this.currentDate = currentDate;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu About;
-    private javax.swing.JMenuItem choiceInDelRegNumFile;
-    private javax.swing.JMenuItem choiceInDelSebraCodesFile;
-    private javax.swing.JMenuItem choiceRegNumFile;
-    private javax.swing.JMenuItem choiceSebraCodesFile;
     private javax.swing.JScrollPane generalSebraScrollPane;
     private javax.swing.JTextArea gsTextArea;
     private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenuItem mAnonymAdministrations;
+    private javax.swing.JMenuItem mAnonymData;
+    private javax.swing.JMenuItem mCheckData;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenu menuAbout;
+    private javax.swing.JMenu menuAnonymization;
+    private javax.swing.JMenu menuCheckMeu;
     private javax.swing.JMenu menuChoiceFile;
-    private javax.swing.JMenu menuDeleteRegNum;
-    private javax.swing.JMenu menuDeleteSebraCode;
-    private javax.swing.JMenuItem menuInCsv;
-    private javax.swing.JMenuItem menuOrgCsv;
     private javax.swing.JMenuBar sebraMenuBar;
     private javax.swing.JLabel statusLabel;
     private javax.swing.JPanel statusPanel;
